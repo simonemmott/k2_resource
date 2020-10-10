@@ -1,1 +1,1 @@
-# k2_resource
+# K2 Resoource
