@@ -1,8 +1,10 @@
-package org.k2.resource;
+package org.k2.resource.binary;
 
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.k2.resource.binary.BinaryEntity;
+import org.k2.resource.binary.BinaryEntityFactory;
 
 class BinaryEntityTest {
 	
@@ -17,19 +19,6 @@ class BinaryEntityTest {
 		assertThat(be.getKey()).isEqualTo("KEY");
 		assertThat(be.getData()).isEqualTo("DATA".getBytes());
 		assertThat(be.getChecksum()).isEqualTo(2607161047L);
-	}
-
-	@Test
-	void newInstanceWithoutKeyTest() {
-		String data = "DATA";
-		BinaryEntity be = bef.create(data);
-		
-		assertThat(be.getKey()).isNull();
-		assertThat(be.getData()).isEqualTo("DATA".getBytes());
-		assertThat(be.getChecksum()).isEqualTo(2607161047L);
-		
-		be.setKey("KEY");
-		assertThat(be.getKey()).isEqualTo("KEY");
 	}
 
 }

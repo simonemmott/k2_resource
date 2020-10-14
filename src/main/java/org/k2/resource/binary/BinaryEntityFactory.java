@@ -1,4 +1,4 @@
-package org.k2.resource;
+package org.k2.resource.binary;
 
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -16,18 +16,12 @@ public class BinaryEntityFactory {
 	public BinaryEntityFactory() {
 	}
 	
-	public BinaryEntity create(String data) {
-		if (checksum.get() == null) {
-			checksum.set(new CRC32());
-		}
-		return new BinaryEntity(data.getBytes(), checksum.get());
-	}
-
 	public BinaryEntity create(String key, String data) {
 		if (checksum.get() == null) {
 			checksum.set(new CRC32());
 		}
-		return new BinaryEntity(key, data.getBytes(), checksum.get());
+		checksum.get().update(data.getBytes(),0,data.getBytes().length);
+		return new BinaryEntity(key, data.getBytes(), checksum.get().getValue());
 	}
 
 }

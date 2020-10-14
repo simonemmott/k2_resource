@@ -1,4 +1,4 @@
-package org.k2.resource;
+package org.k2.resource.exception;
 
 public class UnexpectedResourceError extends RuntimeException {
 
