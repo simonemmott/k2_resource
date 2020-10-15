@@ -57,5 +57,24 @@ class BinaryResourceTest {
 			
 		}
 	}
+	
+	@Test
+	void testExists() throws Exception {
+		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
+		BinaryResource resource = new BinaryResource(resourceDir, checksum);
+		assertThat(resource.exists("FredFlintstone")).isTrue();
+		assertThat(resource.exists("BarneyRubble")).isTrue();
+		assertThat(resource.exists("XXXX")).isFalse();
+		
+	}
+
+	@Test
+	void testFetch() throws Exception {
+		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
+		BinaryResource resource = new BinaryResource(resourceDir, checksum);
+		assertThat(resource.fetch()).contains(resource.get("FredFlintstone"));
+		assertThat(resource.fetch()).contains(resource.get("BarneyRubble"));
+		assertThat(resource.fetch().size()).isEqualTo(resource.count());		
+	}
 
 }

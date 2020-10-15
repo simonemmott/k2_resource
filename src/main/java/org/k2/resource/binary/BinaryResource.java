@@ -2,6 +2,7 @@ package org.k2.resource.binary;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,8 +66,12 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 
 	@Override
 	public List<BinaryEntity> fetch() {
-		// TODO Auto-generated method stub
-		return null;
+		List<BinaryEntity> result = new LinkedList<BinaryEntity>();
+		index.values().stream()
+				.forEach(item -> {
+					result.add(new BinaryEntity(item));
+				});
+		return result;
 	}
 
 	@Override
@@ -84,6 +89,11 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	@Override
 	public int count() {
 		return index.size();
+	}
+	
+	@Override
+	public boolean exists(String key) {
+		return index.containsKey(key);
 	}
 
 }

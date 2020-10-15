@@ -14,4 +14,5 @@ public interface Resource<K,V> {
 	List<V> fetch();
 	V delete(K key) throws MissingKeyError;
 	int count();
+	boolean exists(K key);
 }

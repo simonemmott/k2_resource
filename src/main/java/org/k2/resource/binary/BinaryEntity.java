@@ -1,9 +1,10 @@
 package org.k2.resource.binary;
 
-
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+@EqualsAndHashCode
 @Getter
 public class BinaryEntity {
 	
