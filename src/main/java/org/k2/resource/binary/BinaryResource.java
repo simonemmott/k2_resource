@@ -1,6 +1,8 @@
 package org.k2.resource.binary;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import org.k2.resource.Resource;
@@ -15,13 +18,22 @@ import org.k2.resource.binary.exception.BinaryResourceInitializeException;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
+import org.k2.resource.exception.UnexpectedResourceError;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class BinaryResource implements Resource<String, BinaryEntity> {
 
+	@Getter
 	private final File dir;
 	private final Map<String,BinaryResourceItem> index;
+	@Getter
+	@Setter
+	private String datafileExtension = "json";
+	private final ThreadLocal<Checksum> checksum;
 	
-	public BinaryResource(File dir, Checksum checksum) throws BinaryResourceInitializeException {
+	public BinaryResource(File dir, ThreadLocal<Checksum> checksum) throws BinaryResourceInitializeException {
 		
 		if (! dir.exists()) throw new BinaryResourceInitializeException("Resource directory does not exist", dir);
 		if (! dir.isDirectory()) throw new BinaryResourceInitializeException("Resource directory is not a directory", dir);
@@ -30,10 +42,19 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 		
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
+		this.checksum = checksum;
 		
 		for (File resourceFile : readResourceFiles(dir)) {
-			BinaryResourceItem indexItem = new BinaryResourceItem(resourceFile, checksum);
-			index.put(indexItem.getKey(), indexItem);
+			try {
+				BinaryResourceItem indexItem = new BinaryResourceItem(this, resourceFile, checksum.get());
+				index.put(indexItem.getKey(), indexItem);
+			} catch (IOException err) {
+				throw new BinaryResourceInitializeException(MessageFormat.format(
+						"Unable to read data file: {0} while initializing respurce: {0}",
+						resourceFile,
+						dir),
+						dir);
+			}
 		}
 	}
 	
@@ -45,8 +66,15 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 
 	@Override
 	public BinaryEntity create(String key, BinaryEntity obj) throws DuplicateKeyError {
-		// TODO Auto-generated method stub
-		return null;
+		obj.setKey(key);
+		try {
+			BinaryResourceItem newItem = new BinaryResourceItem(this, obj, checksum.get());
+			return new BinaryEntity(newItem);
+		} catch (IOException err) {
+			throw new UnexpectedResourceError(
+					MessageFormat.format("Unable to create new resource data file for entity with key: {0}",
+							key), err);
+		}
 	}
 
 	@Override

@@ -12,12 +12,14 @@ import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.k2.resource.binary.BinaryEntity;
-import org.k2.resource.binary.BinaryEntityFactory;
 import org.k2.resource.exception.MissingKeyError;
 
 class BinaryResourceTest {
 	
-	private static final Checksum checksum = new CRC32();
+	private static final ThreadLocal<Checksum> checksum = ThreadLocal.withInitial(
+			() -> {
+				return new CRC32();
+			});
 	
 	@Test
 	void testNewBinaryResourceLoadsDataFiles() throws Exception {		
@@ -76,5 +78,38 @@ class BinaryResourceTest {
 		assertThat(resource.fetch()).contains(resource.get("BarneyRubble"));
 		assertThat(resource.fetch().size()).isEqualTo(resource.count());		
 	}
+	
+	@Test
+	void testCreate() throws Exception {
+		File resourceDir = new File("testFilesystem/BinaryResourceTest/testCreate");
+		BinaryResource resource = new BinaryResource(resourceDir, checksum);
+		
+		File dataFile = new File("testFilesystem/BinaryResourceTest/testCreate/XXXX."
+				+resource.getDatafileExtension());
+		if (dataFile.exists()) dataFile.delete();
+		BinaryEntity be = new BinaryEntity("XXXX", "AAAA".getBytes());
+		assertThat(be.getChecksum()).isEqualTo(-1);
+		
+		BinaryEntity savedBe = resource.create("XXXX", be);
+		
+		assertThat(savedBe).isEqualTo(be);
+		assertThat(savedBe.getChecksum()).isNotEqualTo(-1);
+		assertThat(dataFile.exists()).isTrue();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }

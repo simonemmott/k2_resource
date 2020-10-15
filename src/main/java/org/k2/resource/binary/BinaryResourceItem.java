@@ -17,16 +17,29 @@ public class BinaryResourceItem {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(BinaryResourceItem.class);
 	
+	private final BinaryResource resource;
 	private final File datafile;
 	@Getter
 	private long checksum;
+	
+	public BinaryResourceItem(
+			BinaryResource resource, 
+			BinaryEntity entity, 
+			Checksum checksum) throws IOException {
+		this.resource = resource;
+		this.datafile = new File(
+				resource.getDir().getPath()+File.separatorChar+
+				entity.getKey()+"."+resource.getDatafileExtension());
+		checksum.update(entity.getData(), 0, entity.getData().length);
+		this.checksum = checksum.getValue();
+		FileUtils.writeByteArrayToFile(datafile, entity.getData());
+	}
 
-	public BinaryResourceItem(File datafile, Checksum checksum) {
-		assert datafile.isFile();
-		assert datafile.exists();
-		assert datafile.canRead();
-		assert datafile.canWrite();
-		
+	public BinaryResourceItem(
+			BinaryResource resource, 
+			File datafile, 
+			Checksum checksum) throws IOException {
+		this.resource = resource;
 		this.datafile = datafile;
 		byte[] data = getBytes();
 		checksum.update(data, 0, data.length);
@@ -37,30 +50,22 @@ public class BinaryResourceItem {
 		return datafile.getName().split("\\.(?=[^\\.]+$)")[0];
 	}
 	
-	byte[] getBytes() {
-		try {
-			return FileUtils.readFileToByteArray(datafile);
-		} catch (IOException err) {
-			throw new UnexpectedResourceError(
-					MessageFormat.format("Unable to read bytes for binary resource item: {0}", datafile.getName()),
-					err);
-		}
+	byte[] getBytes() throws IOException {
+		return FileUtils.readFileToByteArray(datafile);
 	}
 	
-	void update(BinaryEntity entity, Checksum checksum) throws MutatingEntityError {
+	void update(BinaryEntity entity, Checksum checksum) throws MutatingEntityError, IOException {
 		if (entity.getChecksum() == this.checksum) {
-			try {
-				FileUtils.writeByteArrayToFile(datafile, entity.getData());
-				checksum.update(entity.getData(), 0, entity.getData().length);
-				this.checksum = checksum.getValue();
-			} catch (IOException err) {
-				throw new UnexpectedResourceError(
-						MessageFormat.format("Unable to write bytes for binary resource item: {0}", datafile.getName()),
-						err);
-			}
+			FileUtils.writeByteArrayToFile(datafile, entity.getData());
+			checksum.update(entity.getData(), 0, entity.getData().length);
+			this.checksum = checksum.getValue();
 		} else {
 			throw new MutatingEntityError(BinaryResourceItem.class, entity.getKey());
 		}
+	}
+	
+	void write() {
+		
 	}
 
 }
