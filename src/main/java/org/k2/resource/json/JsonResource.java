@@ -46,7 +46,6 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 
 	private final BinaryResource resource;
 	private final KeyGetter<K> keyGetter;
-	private final KeySetter<K> keySetter;
 	private final KeySerializer<K> keySerializer;
 	private final KeyDeserializer<K> keyDeserializer;
 	private final ObjectMapper mapper;
@@ -56,14 +55,12 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 			File dir,
 			ThreadLocal<Checksum> checksum,
 			KeyGetter<K> keyGetter,
-			KeySetter<K> keySetter,
 			KeySerializer<K> keySerializer,
 			KeyDeserializer<K> keyDeserializer,
 			SerialStyle style
 			) throws BinaryResourceInitializeException {
 		this.resource = new BinaryResource(dir, checksum);
 		this.keyGetter = keyGetter;
-		this.keySetter = keySetter;
 		this.keySerializer = keySerializer;
 		this.keyDeserializer = keyDeserializer;
 		if (style == SerialStyle.YAML) {
