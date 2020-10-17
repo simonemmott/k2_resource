@@ -18,7 +18,7 @@ public class BinaryEntity {
 	private byte[] data;
 	private final long checksum;
 	
-	BinaryEntity(String key, byte[] data) {
+	public BinaryEntity(String key, byte[] data) {
 		assert key != null;
 		this.key = key;
 		this.data = data;
