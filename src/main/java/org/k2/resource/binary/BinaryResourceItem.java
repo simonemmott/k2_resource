@@ -46,6 +46,13 @@ public class BinaryResourceItem {
 		this.checksum = checksum.getValue();
 	}
 	
+	boolean isNew() {
+		return checksum == BinaryResource.NEW_ENTITY;
+	}
+	boolean isDeleted() {
+		return checksum == BinaryResource.DELETED;
+	}
+
 	public String getKey() {
 		return datafile.getName().split("\\.(?=[^\\.]+$)")[0];
 	}
@@ -55,17 +62,22 @@ public class BinaryResourceItem {
 	}
 	
 	void update(BinaryEntity entity, Checksum checksum) throws MutatingEntityError, IOException {
+		if (isDeleted()) throw new MutatingEntityError(getKey(), "Unable to update a deleted binary item");
 		if (entity.getChecksum() == this.checksum) {
 			FileUtils.writeByteArrayToFile(datafile, entity.getData());
 			checksum.update(entity.getData(), 0, entity.getData().length);
 			this.checksum = checksum.getValue();
 		} else {
-			throw new MutatingEntityError(BinaryResourceItem.class, entity.getKey());
+			throw new MutatingEntityError(entity.getKey());
 		}
 	}
 	
-	void write() {
-		
+	byte[] delete() throws MutatingEntityError, IOException {
+		if (isDeleted()) throw new MutatingEntityError(getKey(), "Unable to delete a deleted binary item");
+		byte[] data = getBytes();
+		datafile.delete();
+		this.checksum = BinaryResource.DELETED;
+		return data;
 	}
-
+	
 }

@@ -22,7 +22,7 @@ public class BinaryEntity {
 		assert key != null;
 		this.key = key;
 		this.data = data;
-		this.checksum = -1;		
+		this.checksum = BinaryResource.NEW_ENTITY;		
 	}
 
 	BinaryEntity(BinaryResourceItem item) {
@@ -33,6 +33,19 @@ public class BinaryEntity {
 		} catch (IOException err) {
 			throw new UnexpectedResourceError("Unable to read data for resource item with key: " + item.getKey());
 		}
+	}
+	
+	BinaryEntity(BinaryResourceItem item, byte[] data) {
+		this.key = item.getKey();
+		this.data = data;
+		this.checksum = item.getChecksum();
+	}
+	
+	boolean isNew() {
+		return checksum == BinaryResource.NEW_ENTITY;
+	}
+	boolean isDeleted() {
+		return checksum == BinaryResource.DELETED;
 	}
 
 	@Override

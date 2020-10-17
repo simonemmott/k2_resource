@@ -9,20 +9,20 @@ public class DuplicateKeyError extends AbstractKeyError {
 	 */
 	private static final long serialVersionUID = 702782057535453454L;
 
-	private static String buildMessage(Class<?> type, String key) {
-		return MessageFormat.format("Duplcate key detected for type: {0} key: {1}", type.getSimpleName(), key);
+	private static String buildMessage(String key) {
+		return MessageFormat.format("Duplcate key detected for type: {0}", key);
 	}
 
-	public DuplicateKeyError(Class<?> type, String key) {
-		super(type, key, buildMessage(type, key));
+	public DuplicateKeyError(String key) {
+		super(key, buildMessage(key));
 	}
 
-	public DuplicateKeyError(Class<?> type, String key, Throwable cause) {
-		super(type, key, buildMessage(type, key), cause);
+	public DuplicateKeyError(String key, Throwable cause) {
+		super(key, buildMessage(key), cause);
 	}
 
-	public DuplicateKeyError(Class<?> type, String key, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(type, key, buildMessage(type, key), cause, enableSuppression, writableStackTrace);
+	public DuplicateKeyError(String key, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+		super(key, buildMessage(key), cause, enableSuppression, writableStackTrace);
 	}
 
 }
