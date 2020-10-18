@@ -18,17 +18,17 @@ public class DefaultEntitySerializationFactory<K,E> implements EntitySerializati
 	public DefaultEntitySerializationFactory(Class<K> keyType, Class<E> entityType) {
 		this.keyType = keyType;
 		this.entityType = entityType;
-		this.serializer = new DefaultEntitySerializer(entityType);
-		this.deserializer = new DefaultEntityDeserializer(entityType);
-		this.keyGetter = new DefaultKeyGetter(keyType, entityType);
-		this.keySetter = new DefaultKeySetter(keyType, entityType);
-		this.keySerializer = new DefaultKeySerializer(keyType);
-		this.keyDeserializer = new DefaultKeyDeserializer(keyType);
+		this.serializer = new DefaultEntitySerializer<E>(entityType);
+		this.deserializer = new DefaultEntityDeserializer<E>(entityType);
+		this.keyGetter = new DefaultKeyGetter<K,E>(keyType, entityType);
+		this.keySetter = new DefaultKeySetter<K,E>(keyType, entityType);
+		this.keySerializer = new DefaultKeySerializer<K>(keyType);
+		this.keyDeserializer = new DefaultKeyDeserializer<K>(keyType);
 	}
 
 	@Override
 	public BinaryEntityDeserializer create(Class<K> keyType, Class<E> entityType) {
-		return new EntitySerialization()
+		return new EntitySerialization<K,E>()
 				.setSerializer(serializer)
 				.setDeserializer(deserializer)
 				.setKeyDeserializer(keyDeserializer)
