@@ -25,7 +25,7 @@ import org.k2.resource.exception.UnexpectedResourceError;
 import lombok.Getter;
 import lombok.Setter;
 
-public class BinaryResource implements Resource<String, BinaryEntity> {
+public class BinaryResource implements Resource<String, BinaryWrapper> {
 	
 	public final static int NEW_ENTITY = -1;
 	public final static int DELETED = -2;
@@ -94,7 +94,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	}
 
 	@Override
-	public BinaryEntity create(String key, BinaryEntity obj) throws DuplicateKeyError, MutatingEntityError {
+	public BinaryWrapper create(String key, BinaryWrapper obj) throws DuplicateKeyError, MutatingEntityError {
 		if (! obj.isNew()) throw new MutatingEntityError(key, "The RefItem is not new during create");
 		if (obj.isDeleted()) throw new MutatingEntityError(key, "The RefItem is deleted during create");
 		if (index.containsKey(key)) throw new DuplicateKeyError(key);
@@ -120,7 +120,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	}
 
 	@Override
-	public BinaryEntity update(String key, BinaryEntity obj) throws MissingKeyError, MutatingEntityError {
+	public BinaryWrapper update(String key, BinaryWrapper obj) throws MissingKeyError, MutatingEntityError {
 		if (obj.isNew()) throw new MutatingEntityError(key, "The RefIten is new during update");
 		if (obj.isDeleted()) throw new MutatingEntityError(key, "The RefItem is deleted during update");
 		if (!index.containsKey(key)) throw new MissingKeyError(key);
@@ -136,8 +136,8 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	}
 
 	@Override
-	public List<BinaryEntity> fetch() {
-		List<BinaryEntity> result = new LinkedList<BinaryEntity>();
+	public List<BinaryWrapper> fetch() {
+		List<BinaryWrapper> result = new LinkedList<>();
 		index.values().stream()
 				.forEach(item -> {
 					result.add(new BinaryEntity(item));
@@ -146,7 +146,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	}
 
 	@Override
-	public BinaryEntity remove(String key) throws MissingKeyError, MutatingEntityError {
+	public BinaryWrapper remove(String key) throws MissingKeyError, MutatingEntityError {
 		if (!index.containsKey(key)) throw new MissingKeyError(key);
 		BinaryResourceItem item = index.get(key);
 		try {
@@ -160,7 +160,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	}
 
 	@Override
-	public BinaryEntity save(BinaryEntity obj) throws MissingKeyError, MutatingEntityError, DuplicateKeyError {
+	public BinaryWrapper save(BinaryWrapper obj) throws MissingKeyError, MutatingEntityError, DuplicateKeyError {
 		if (obj.isDeleted()) throw new MutatingEntityError(obj.getKey(), "The RefItem is deleted during save");
 		if (obj.getKey() == null) {
 			String key = generator.generate();
@@ -189,7 +189,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	}
 
 	@Override
-	public void delete(BinaryEntity obj) throws MissingKeyError, MutatingEntityError {
+	public void delete(BinaryWrapper obj) throws MissingKeyError, MutatingEntityError {
 		if (obj.isNew()) throw new MutatingEntityError(obj.getKey(), "The RefIten is new during delete");
 		if (obj.isDeleted()) throw new MutatingEntityError(obj.getKey(), "The RefItem is deleted during delete");
 		remove(obj.getKey());

@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-public class BinaryEntity {
+public class BinaryEntity implements BinaryWrapper {
 	
 	@Setter
 	private String key;
@@ -41,10 +41,10 @@ public class BinaryEntity {
 		this.checksum = item.getChecksum();
 	}
 	
-	boolean isNew() {
+	public boolean isNew() {
 		return checksum == BinaryResource.NEW_ENTITY;
 	}
-	boolean isDeleted() {
+	public boolean isDeleted() {
 		return checksum == BinaryResource.DELETED;
 	}
 

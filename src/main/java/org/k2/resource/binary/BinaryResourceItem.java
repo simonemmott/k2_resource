@@ -24,15 +24,15 @@ public class BinaryResourceItem {
 	
 	public BinaryResourceItem(
 			BinaryResource resource, 
-			BinaryEntity entity, 
+			BinaryWrapper obj, 
 			Checksum checksum) throws IOException {
 		this.resource = resource;
 		this.datafile = new File(
 				resource.getDir().getPath()+File.separatorChar+
-				entity.getKey()+"."+resource.getDatafileExtension());
-		checksum.update(entity.getData(), 0, entity.getData().length);
+				obj.getKey()+"."+resource.getDatafileExtension());
+		checksum.update(obj.getData(), 0, obj.getData().length);
 		this.checksum = checksum.getValue();
-		FileUtils.writeByteArrayToFile(datafile, entity.getData());
+		FileUtils.writeByteArrayToFile(datafile, obj.getData());
 	}
 
 	public BinaryResourceItem(
@@ -61,14 +61,14 @@ public class BinaryResourceItem {
 		return FileUtils.readFileToByteArray(datafile);
 	}
 	
-	void update(BinaryEntity entity, Checksum checksum) throws MutatingEntityError, IOException {
+	void update(BinaryWrapper obj, Checksum checksum) throws MutatingEntityError, IOException {
 		if (isDeleted()) throw new MutatingEntityError(getKey(), "Unable to update a deleted binary item");
-		if (entity.getChecksum() == this.checksum) {
-			FileUtils.writeByteArrayToFile(datafile, entity.getData());
-			checksum.update(entity.getData(), 0, entity.getData().length);
+		if (obj.getChecksum() == this.checksum) {
+			FileUtils.writeByteArrayToFile(datafile, obj.getData());
+			checksum.update(obj.getData(), 0, obj.getData().length);
 			this.checksum = checksum.getValue();
 		} else {
-			throw new MutatingEntityError(entity.getKey());
+			throw new MutatingEntityError(obj.getKey());
 		}
 	}
 	
