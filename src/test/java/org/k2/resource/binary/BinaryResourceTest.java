@@ -11,7 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
-import org.k2.resource.binary.BinaryEntity;
+import org.k2.resource.binary.BinaryEntityImpl;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 
@@ -89,10 +89,10 @@ class BinaryResourceTest {
 		
 		File dataFile = new File("testFilesystem/BinaryResourceTest/testCreate/XXXX."
 				+resource.getDatafileExtension());
-		BinaryEntity be = new BinaryEntity("XXXX", "AAAA".getBytes());
+		BinaryEntity be = new BinaryEntityImpl("XXXX", "AAAA".getBytes());
 		assertThat(be.getChecksum()).isEqualTo(-1);
 		
-		BinaryWrapper savedBe = resource.create("XXXX", be);
+		BinaryEntity savedBe = resource.create("XXXX", be);
 		
 		assertThat(savedBe).isEqualTo(be);
 		assertThat(savedBe.getChecksum()).isNotEqualTo(-1);
@@ -105,7 +105,7 @@ class BinaryResourceTest {
 	void testCreateThrowsDuplicateKeyException() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
-		BinaryEntity be = new BinaryEntity("AAAA", "AAAA".getBytes());
+		BinaryEntityImpl be = new BinaryEntityImpl("AAAA", "AAAA".getBytes());
 		
 		assertThatThrownBy(() -> {
 			resource.create("FredFlintstone", be);
@@ -120,11 +120,11 @@ class BinaryResourceTest {
 		
 		File dataFile = new File("testFilesystem/BinaryResourceTest/testUpdate/XXXX."
 				+resource.getDatafileExtension());
-		BinaryWrapper be = new BinaryEntity("XXXX", "AAAA".getBytes());
+		BinaryEntity be = new BinaryEntityImpl("XXXX", "AAAA".getBytes());
 		be = resource.create("XXXX", be);
 		
 		be.setData("BBBB".getBytes());
-		BinaryWrapper beUpdated = resource.update("XXXX", be);
+		BinaryEntity beUpdated = resource.update("XXXX", be);
 		
 		assertThat(FileUtils.readFileToByteArray(dataFile)).isEqualTo("BBBB".getBytes());
 		assertThat(beUpdated.getChecksum()).isNotEqualTo(be.getChecksum());
@@ -141,11 +141,11 @@ class BinaryResourceTest {
 		
 		BinaryResource resourceSpy = spy(resource);
 		
-		BinaryEntity mockEntity = mock(BinaryEntity.class);
+		BinaryEntityImpl mockEntity = mock(BinaryEntityImpl.class);
 		doReturn(mockEntity).when(resourceSpy).create(any(), any());
 		
-		BinaryEntity be = new BinaryEntity("AAAA", "AAAA".getBytes());
-		BinaryWrapper savedBe = resourceSpy.save(be);
+		BinaryEntityImpl be = new BinaryEntityImpl("AAAA", "AAAA".getBytes());
+		BinaryEntity savedBe = resourceSpy.save(be);
 		
 		assertThat(savedBe).isEqualTo(mockEntity);
 		verify(resourceSpy, times(1)).create(eq("AAAA"), eq(be));
@@ -156,16 +156,16 @@ class BinaryResourceTest {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testSave");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
-		BinaryWrapper be = resource.create("AAAA", new BinaryEntity("AAAA", "AAAA".getBytes()));
+		BinaryEntity be = resource.create("AAAA", new BinaryEntityImpl("AAAA", "AAAA".getBytes()));
 		
 		BinaryResource resourceSpy = spy(resource);
 		
-		BinaryEntity mockEntity = mock(BinaryEntity.class);
+		BinaryEntityImpl mockEntity = mock(BinaryEntityImpl.class);
 		doReturn(mockEntity).when(resourceSpy).update(any(), any());
 		
 		be.setData("XXXX".getBytes());
 		
-		BinaryWrapper updatedBe = resourceSpy.save(be);
+		BinaryEntity updatedBe = resourceSpy.save(be);
 		
 		assertThat(updatedBe).isEqualTo(mockEntity);
 		verify(resourceSpy, times(1)).update(eq("AAAA"), eq(be));
@@ -176,13 +176,13 @@ class BinaryResourceTest {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testDelete");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
-		BinaryWrapper be = resource.create("AAAA", new BinaryEntity("AAAA", "AAAA".getBytes()));
+		BinaryEntity be = resource.create("AAAA", new BinaryEntityImpl("AAAA", "AAAA".getBytes()));
 		File dataFile = new File("testFilesystem/BinaryResourceTest/testDelete/AAAA."
 				+resource.getDatafileExtension());
 		assertThat(dataFile).exists();
 		assertThat(resource.keys()).contains("AAAA");
 		
-		BinaryWrapper deletedBe = resource.remove("AAAA");
+		BinaryEntity deletedBe = resource.remove("AAAA");
 		
 		assertThat(deletedBe.getKey()).isEqualTo("AAAA");
 		assertThat(deletedBe.getData()).isEqualTo("AAAA".getBytes());
@@ -197,11 +197,11 @@ class BinaryResourceTest {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testDelete");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
-		BinaryWrapper be = resource.create("AAAA", new BinaryEntity("AAAA", "AAAA".getBytes()));
+		BinaryEntity be = resource.create("AAAA", new BinaryEntityImpl("AAAA", "AAAA".getBytes()));
 		
 		BinaryResource resourceSpy = spy(resource);
 		
-		doReturn(mock(BinaryEntity.class)).when(resourceSpy).remove(anyString());
+		doReturn(mock(BinaryEntityImpl.class)).when(resourceSpy).remove(anyString());
 		
 		resourceSpy.delete(be);
 		

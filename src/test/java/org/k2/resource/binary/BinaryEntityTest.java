@@ -3,7 +3,7 @@ package org.k2.resource.binary;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import org.k2.resource.binary.BinaryEntity;
+import org.k2.resource.binary.BinaryEntityImpl;
 
 class BinaryEntityTest {
 	
@@ -12,7 +12,7 @@ class BinaryEntityTest {
 	void newInstanceWithKeyTest() {
 		String key = "KEY";
 		String data = "DATA";
-		BinaryEntity be = new BinaryEntity("KEY", "DATA".getBytes());
+		BinaryEntityImpl be = new BinaryEntityImpl("KEY", "DATA".getBytes());
 		
 		assertThat(be.getKey()).isEqualTo("KEY");
 		assertThat(be.getData()).isEqualTo("DATA".getBytes());

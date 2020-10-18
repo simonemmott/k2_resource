@@ -9,9 +9,9 @@ import java.util.Set;
 import java.util.zip.Checksum;
 
 import org.k2.resource.Resource;
-import org.k2.resource.binary.BinaryEntity;
+import org.k2.resource.binary.BinaryEntityImpl;
 import org.k2.resource.binary.BinaryResource;
-import org.k2.resource.binary.BinaryWrapper;
+import org.k2.resource.binary.BinaryEntity;
 import org.k2.resource.binary.exception.BinaryResourceInitializeException;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
@@ -76,9 +76,9 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 		}		
 	}
 	
-	private BinaryEntity entity(K key, JsonNode obj) {
+	private BinaryEntityImpl entity(K key, JsonNode obj) {
 		try {
-			return new BinaryEntity(keySerializer.serialize(key), writer.writeValueAsBytes(obj));
+			return new BinaryEntityImpl(keySerializer.serialize(key), writer.writeValueAsBytes(obj));
 		} catch (JsonProcessingException err) {
 			throw new UnexpectedResourceError(err);
 		}
@@ -87,7 +87,7 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 	@Override
 	public JsonNode create(K key, JsonNode obj) throws DuplicateKeyError, MutatingEntityError {
 		try {
-			BinaryWrapper entity = entity(key, obj);
+			BinaryEntity entity = entity(key, obj);
 			entity = resource.create(entity.getKey(), entity);
 			return mapper.readTree(entity.getData());
 		} catch (IOException err) {
@@ -108,7 +108,7 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 	@Override
 	public JsonNode update(K key, JsonNode obj) throws MissingKeyError, MutatingEntityError {
 		try {
-			BinaryWrapper entity = entity(key, obj);
+			BinaryEntity entity = entity(key, obj);
 			entity = resource.update(entity.getKey(), entity);
 			return mapper.readTree(entity.getData());
 		} catch (IOException err) {
@@ -119,7 +119,7 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 	@Override
 	public JsonNode save(JsonNode obj) throws MissingKeyError, MutatingEntityError, DuplicateKeyError {
 		try {
-			BinaryWrapper entity = entity(keyGetter.getKey(obj), obj);
+			BinaryEntity entity = entity(keyGetter.getKey(obj), obj);
 			entity = resource.save(entity);
 			return mapper.readTree(entity.getData());
 		} catch (IOException err) {
@@ -130,9 +130,9 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 	@Override
 	public List<JsonNode> fetch() {
 		try {
-			List<BinaryWrapper> entities = resource.fetch();
+			List<BinaryEntity> entities = resource.fetch();
 			List<JsonNode> jsonEntities = new ArrayList<>(entities.size());
-			for (BinaryWrapper entity : entities) {
+			for (BinaryEntity entity : entities) {
 				jsonEntities.add(mapper.readTree(entity.getData()));
 			}
 			return jsonEntities;
@@ -144,7 +144,7 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 	@Override
 	public JsonNode remove(K key) throws MissingKeyError, MutatingEntityError {
 		try {
-			BinaryWrapper entity = resource.remove(keySerializer.serialize(key));
+			BinaryEntity entity = resource.remove(keySerializer.serialize(key));
 			return mapper.readTree(entity.getData());
 		} catch (IOException err) {
 			throw new UnexpectedResourceError(err);

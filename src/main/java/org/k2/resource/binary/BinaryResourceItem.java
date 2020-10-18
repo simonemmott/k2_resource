@@ -21,18 +21,20 @@ public class BinaryResourceItem {
 	private final File datafile;
 	@Getter
 	private long checksum;
+	private byte[] data;
 	
 	public BinaryResourceItem(
 			BinaryResource resource, 
-			BinaryWrapper obj, 
+			BinaryEntity obj, 
 			Checksum checksum) throws IOException {
 		this.resource = resource;
 		this.datafile = new File(
 				resource.getDir().getPath()+File.separatorChar+
 				obj.getKey()+"."+resource.getDatafileExtension());
-		checksum.update(obj.getData(), 0, obj.getData().length);
+		this.data = obj.getData();
+		checksum.update(data, 0, data.length);
 		this.checksum = checksum.getValue();
-		FileUtils.writeByteArrayToFile(datafile, obj.getData());
+		FileUtils.writeByteArrayToFile(datafile, data);
 	}
 
 	public BinaryResourceItem(
@@ -41,7 +43,7 @@ public class BinaryResourceItem {
 			Checksum checksum) throws IOException {
 		this.resource = resource;
 		this.datafile = datafile;
-		byte[] data = getBytes();
+		this.data = FileUtils.readFileToByteArray(datafile);
 		checksum.update(data, 0, data.length);
 		this.checksum = checksum.getValue();
 	}
@@ -57,15 +59,16 @@ public class BinaryResourceItem {
 		return datafile.getName().split("\\.(?=[^\\.]+$)")[0];
 	}
 	
-	byte[] getBytes() throws IOException {
-		return FileUtils.readFileToByteArray(datafile);
+	byte[] getBytes() {
+		return data;
 	}
 	
-	void update(BinaryWrapper obj, Checksum checksum) throws MutatingEntityError, IOException {
+	void update(BinaryEntity obj, Checksum checksum) throws MutatingEntityError, IOException {
 		if (isDeleted()) throw new MutatingEntityError(getKey(), "Unable to update a deleted binary item");
 		if (obj.getChecksum() == this.checksum) {
-			FileUtils.writeByteArrayToFile(datafile, obj.getData());
-			checksum.update(obj.getData(), 0, obj.getData().length);
+			data = obj.getData();
+			FileUtils.writeByteArrayToFile(datafile, data);
+			checksum.update(data, 0, data.length);
 			this.checksum = checksum.getValue();
 		} else {
 			throw new MutatingEntityError(obj.getKey());
@@ -74,9 +77,8 @@ public class BinaryResourceItem {
 	
 	byte[] delete() throws MutatingEntityError, IOException {
 		if (isDeleted()) throw new MutatingEntityError(getKey(), "Unable to delete a deleted binary item");
-		byte[] data = getBytes();
 		datafile.delete();
-		this.checksum = BinaryResource.DELETED;
+		checksum = BinaryResource.DELETED;
 		return data;
 	}
 	

@@ -7,14 +7,14 @@ import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
 
-public interface Resource<K,V> {
-	V create(K key, V obj) throws DuplicateKeyError, MutatingEntityError;
-	V get(K key) throws MissingKeyError;
-	V update(K key, V obj) throws MissingKeyError, MutatingEntityError;
-	V save(V obj) throws MissingKeyError, MutatingEntityError, DuplicateKeyError;
-	List<V> fetch();
-	V remove(K key) throws MissingKeyError, MutatingEntityError;
-	void delete(V obj) throws MissingKeyError, MutatingEntityError;
+public interface Resource<K,E> {
+	E create(K key, E obj) throws DuplicateKeyError, MutatingEntityError;
+	E get(K key) throws MissingKeyError;
+	E update(K key, E obj) throws MissingKeyError, MutatingEntityError;
+	E save(E obj) throws MissingKeyError, MutatingEntityError, DuplicateKeyError;
+	List<E> fetch();
+	E remove(K key) throws MissingKeyError, MutatingEntityError;
+	void delete(E obj) throws MissingKeyError, MutatingEntityError;
 	int count();
 	boolean exists(K key);
 	Set<K> keys();
