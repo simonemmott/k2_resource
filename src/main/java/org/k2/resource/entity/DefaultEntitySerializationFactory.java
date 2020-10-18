@@ -36,5 +36,4 @@ public class DefaultEntitySerializationFactory<K,E> implements EntitySerializati
 				.setKeyGetter(keyGetter)
 				.setKeySetter(keySetter);
 	}
-
 }
