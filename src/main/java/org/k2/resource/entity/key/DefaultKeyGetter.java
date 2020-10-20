@@ -1,4 +1,4 @@
-package org.k2.resource.entity;
+package org.k2.resource.entity.key;
 
 public class DefaultKeyGetter<K,E> implements KeyGetter<K,E> {
 

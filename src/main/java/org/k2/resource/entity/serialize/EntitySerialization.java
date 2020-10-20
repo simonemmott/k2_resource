@@ -1,9 +1,12 @@
-package org.k2.resource.entity;
+package org.k2.resource.entity.serialize;
 
 import org.k2.resource.binary.BinaryEntity;
 import org.k2.resource.binary.BinaryEntityDeserializer;
 import org.k2.resource.binary.KeyDeserializer;
 import org.k2.resource.binary.KeySerializer;
+import org.k2.resource.entity.WrappedEntity;
+import org.k2.resource.entity.key.KeyGetter;
+import org.k2.resource.entity.key.KeySetter;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

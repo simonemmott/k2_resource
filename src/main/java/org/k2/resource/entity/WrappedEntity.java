@@ -8,6 +8,7 @@ import org.k2.resource.binary.BinaryResourceItem;
 import org.k2.resource.binary.BinaryEntity;
 import org.k2.resource.binary.KeyDeserializer;
 import org.k2.resource.binary.KeySerializer;
+import org.k2.resource.entity.serialize.EntitySerialization;
 import org.k2.resource.exception.UnexpectedResourceError;
 
 import lombok.EqualsAndHashCode;

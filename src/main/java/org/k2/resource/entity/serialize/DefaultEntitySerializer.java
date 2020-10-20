@@ -1,4 +1,4 @@
-package org.k2.resource.entity;
+package org.k2.resource.entity.serialize;
 
 public class DefaultEntitySerializer<E> implements EntitySerializer<E> {
 

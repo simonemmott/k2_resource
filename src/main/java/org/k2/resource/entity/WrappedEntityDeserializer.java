@@ -1,6 +1,7 @@
 package org.k2.resource.entity;
 
 import org.k2.resource.binary.BinaryEntityDeserializer;
+import org.k2.resource.entity.serialize.EntitySerialization;
 
 public class WrappedEntityDeserializer<K,E> implements BinaryEntityDeserializer {
 	

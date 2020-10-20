@@ -9,6 +9,7 @@ import org.k2.resource.MetaResource;
 import org.k2.resource.Resource;
 import org.k2.resource.binary.BinaryResource;
 import org.k2.resource.binary.exception.BinaryResourceInitializeException;
+import org.k2.resource.entity.serialize.EntitySerializationFactory;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;

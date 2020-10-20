@@ -1,8 +1,14 @@
-package org.k2.resource.entity;
+package org.k2.resource.entity.serialize;
 
 import org.k2.resource.binary.BinaryEntityDeserializer;
 import org.k2.resource.binary.KeyDeserializer;
 import org.k2.resource.binary.KeySerializer;
+import org.k2.resource.entity.key.DefaultKeyDeserializer;
+import org.k2.resource.entity.key.DefaultKeyGetter;
+import org.k2.resource.entity.key.DefaultKeySerializer;
+import org.k2.resource.entity.key.DefaultKeySetter;
+import org.k2.resource.entity.key.KeyGetter;
+import org.k2.resource.entity.key.KeySetter;
 
 public class DefaultEntitySerializationFactory<K,E> implements EntitySerializationFactory<K,E> {
 	

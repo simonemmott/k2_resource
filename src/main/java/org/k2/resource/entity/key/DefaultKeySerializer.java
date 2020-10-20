@@ -1,4 +1,4 @@
-package org.k2.resource.entity;
+package org.k2.resource.entity.key;
 
 import org.k2.resource.binary.KeySerializer;
 
