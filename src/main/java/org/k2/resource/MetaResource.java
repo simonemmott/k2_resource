@@ -10,6 +10,7 @@ import lombok.Setter;
 public class MetaResource {
 
 	private String datafileExtension;
+	
 	public MetaResource setDatafileExtension(String datafileExtension) {
 		this.datafileExtension = datafileExtension;
 		return this;

@@ -1,7 +1,7 @@
 package org.k2.resource.entity.key;
 
 public class DefaultKeySetter<K,E> implements KeySetter<K,E> {
-
+	
 	private final Class<K> keyType;
 	private final Class<E> entityType;
 	
