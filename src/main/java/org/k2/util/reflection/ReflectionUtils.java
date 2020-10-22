@@ -70,7 +70,10 @@ public class ReflectionUtils {
 				if (Arrays.asList(argTypes).equals(Arrays.asList(method.getParameterTypes()))) {
 					for (Annotation ann : method.getAnnotations()) {
 						if (ann.annotationType().equals(annType)) {
-							if (method.getReturnType().isAssignableFrom(returnType)) {
+							System.out.println(method.getReturnType());
+							if (method.getReturnType().isAssignableFrom(returnType) ||
+									(method.getReturnType() == void.class &&
+									(returnType.equals(Void.class) || returnType.equals(void.class)))) {
 								return method;
 							}
 							throw new ReflectionError(
