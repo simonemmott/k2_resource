@@ -12,6 +12,9 @@ import java.util.function.Predicate;
 import org.k2.resource.entity.annotation.Key;
 import org.k2.resource.entity.exception.KeyDefinitionException;
 import org.k2.resource.entity.exception.UnexpectedKeyError;
+import org.k2.util.reflection.ReflectionUtils;
+import org.k2.util.reflection.exception.MissingAnnotationError;
+import org.k2.util.reflection.exception.ReflectionError;
 
 import lombok.Getter;
 
@@ -26,52 +29,41 @@ public class DefaultKeyGetter<K,E> implements KeyGetter<K,E> {
 		this.keyType = keyType;
 		this.entityType = entityType;
 		
-		for (Field field : entityType.getDeclaredFields()) {
-			for (Annotation ann : field.getAnnotations()) {
-				if (ann.annotationType().equals(Key.class)) {
-					if (field.getType().isAssignableFrom(keyType)) {
-						field.setAccessible(true);
-						keyGetter = (E entity) -> {
-							try {
-								return (K)field.get(entity);
-							} catch (IllegalArgumentException | IllegalAccessException err) {
-								throw new UnexpectedKeyError(err);
-							}
-						};
-						break;
-					}
-					throw new KeyDefinitionException(
-							entityType, 
-							"The field annotated with @Key is not of type: "+keyType.getName());
+		try {
+			Field keyField = ReflectionUtils.getAnnotatedField(entityType, Key.class, keyType);
+			keyField.setAccessible(true);
+			keyGetter = (E entity) -> {
+				try {
+					return (K)keyField.get(entity);
+				} catch (IllegalArgumentException | IllegalAccessException err) {
+					throw new UnexpectedKeyError(err);
 				}
-				if (keyGetter != null) break; 
-			}
-			if (keyGetter != null) break;
-		}
-		for (Method method : entityType.getDeclaredMethods()) {
-			for (Annotation ann : method.getAnnotations()) {
-				if (ann.annotationType().equals(Key.class)) {
-					if (method.getReturnType().isAssignableFrom(keyType)) {
-						method.setAccessible(true);
-						keyGetter = (E entity) -> {
-							try {
-								return (K)method.invoke(entity);
-							} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException err) {
-								throw new UnexpectedKeyError(err);
-							}
-						};
-						break;
+			};
+			return;
+		} catch (MissingAnnotationError err) {
+			try {
+				Method keyMethod = ReflectionUtils.getAnnotatedMethodReturnsType(entityType, Key.class, keyType);
+				keyMethod.setAccessible(true);
+				keyGetter = (E entity) -> {
+					try {
+						return (K)keyMethod.invoke(entity);
+					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+						throw new UnexpectedKeyError(e);
 					}
-					throw new KeyDefinitionException(
-							entityType, 
-							"The method annotated with @Key does not return type: "+keyType.getName());
-				}
-				if (keyGetter != null) break; 
+				};
+				return;
+			} catch (MissingAnnotationError e) {
+				throw new KeyDefinitionException(entityType, "Unable to identify key field or method");
+			} catch (ReflectionError e) {
+				throw new KeyDefinitionException(
+						entityType, 
+						"The method annotated with @Key does not return type: "+keyType.getName());
 			}
-			if (keyGetter != null) break;
+		} catch (ReflectionError e) {
+			throw new KeyDefinitionException(
+					entityType, 
+					"The field annotated with @Key is not of type: "+keyType.getName());
 		}
-		if (keyGetter == null)
-			throw new KeyDefinitionException(entityType, "Unable to identify key field or method");
 	}
 
 	@Override
