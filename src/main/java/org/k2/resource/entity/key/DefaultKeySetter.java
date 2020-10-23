@@ -17,7 +17,7 @@ import lombok.Getter;
 @Getter
 public class DefaultKeySetter<K,E> implements KeySetter<K,E> {
 	
-	private final Class<K> keyType;
+	private Class<K> keyType;
 	private final Class<E> entityType;
 	private KeySetter<K,E> keySetter = null;
 	
@@ -59,6 +59,44 @@ public class DefaultKeySetter<K,E> implements KeySetter<K,E> {
 			throw new KeyDefinitionException(
 					entityType, 
 					"The field annotated with @Key is not of type: "+keyType.getName());
+		}
+	}
+
+	public DefaultKeySetter (Class<E> entityType) throws EntityConfigurationException {
+		this.entityType = entityType;
+		
+		try {
+			Field keyField = ReflectionUtils.getAnnotatedField(entityType, Key.class);
+			keyField.setAccessible(true);
+			keySetter = (E entity, K key) -> {
+				try {
+					keyField.set(entity, key);
+				} catch (IllegalArgumentException | IllegalAccessException err) {
+					throw new UnexpectedKeyError(err);
+				}
+			};
+			this.keyType = (Class<K>) keyField.getType();
+			return;
+		} catch (MissingAnnotationError err) {
+			try {
+				Method keyMethod = ReflectionUtils.getAnnotatedMethodReturnsType(entityType, Key.class, Void.class, 1);
+				keyMethod.setAccessible(true);
+				keySetter = (E entity, K key) -> {
+					try {
+						keyMethod.invoke(entity, key);
+					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+						throw new UnexpectedKeyError(e);
+					}
+				};
+				this.keyType = (Class<K>) keyMethod.getParameterTypes()[0];
+				return;
+			} catch (MissingAnnotationError e) {
+				throw new KeyDefinitionException(entityType, "Unable to identify key field or method");
+			} catch (ReflectionError e) {
+				throw new KeyDefinitionException(
+						entityType, 
+						"The method annotated with @Key does not return void", e);
+			}
 		}
 	}
 

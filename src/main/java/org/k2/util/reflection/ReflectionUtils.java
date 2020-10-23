@@ -44,6 +44,19 @@ public class ReflectionUtils {
 
 	public static Method getAnnotatedMethod(
 			Class<?> cls, 
+			Class<? extends Annotation> annType) throws MissingAnnotationError {
+		for (Method method : cls.getDeclaredMethods()) {
+			for (Annotation ann : method.getAnnotations()) {
+				if (ann.annotationType().equals(annType)) {
+					return method;
+				}
+			}
+		}
+		throw new MissingAnnotationError(cls, annType, "on methods");
+	}
+
+	public static Method getAnnotatedMethod(
+			Class<?> cls, 
 			Class<? extends Annotation> annType, 
 			Class<?> ... argTypes) throws MissingAnnotationError {
 		for (Method method : cls.getDeclaredMethods()) {
@@ -60,6 +73,22 @@ public class ReflectionUtils {
 		throw new MissingAnnotationError(cls, annType, "on methods with parameters: "+Arrays.asList(argTypes).toString());
 	}
 
+	public static Method getAnnotatedMethod(
+			Class<?> cls, 
+			Class<? extends Annotation> annType, 
+			int argCount) throws MissingAnnotationError {
+		for (Method method : cls.getDeclaredMethods()) {
+			if (method.getParameterCount() == argCount) {
+				for (Annotation ann : method.getAnnotations()) {
+					if (ann.annotationType().equals(annType)) {
+						return method;
+					}
+				}
+			}
+		}
+		throw new MissingAnnotationError(cls, annType, "on methods with "+argCount+" parameters");
+	}
+
 	public static Method getAnnotatedMethodReturnsType(
 			Class<?> cls, 
 			Class<? extends Annotation> annType, 
@@ -70,7 +99,6 @@ public class ReflectionUtils {
 				if (Arrays.asList(argTypes).equals(Arrays.asList(method.getParameterTypes()))) {
 					for (Annotation ann : method.getAnnotations()) {
 						if (ann.annotationType().equals(annType)) {
-							System.out.println(method.getReturnType());
 							if (method.getReturnType().isAssignableFrom(returnType) ||
 									(method.getReturnType() == void.class &&
 									(returnType.equals(Void.class) || returnType.equals(void.class)))) {
@@ -84,7 +112,31 @@ public class ReflectionUtils {
 				}
 			}
 		}
-		throw new MissingAnnotationError(cls, annType, "on methods returning: "+returnType.getName()+"with parameters: "+Arrays.asList(argTypes).toString());
+		throw new MissingAnnotationError(cls, annType, "on methods returning: "+returnType.getName()+" with parameters: "+Arrays.asList(argTypes).toString());
+	}
+
+	public static Method getAnnotatedMethodReturnsType(
+			Class<?> cls, 
+			Class<? extends Annotation> annType, 
+			Class<?> returnType, 
+			int argCount) throws ReflectionError, MissingAnnotationError {
+		for (Method method : cls.getDeclaredMethods()) {
+			if (method.getParameterCount() == argCount) {
+				for (Annotation ann : method.getAnnotations()) {
+					if (ann.annotationType().equals(annType)) {
+						if (method.getReturnType().isAssignableFrom(returnType) ||
+								(method.getReturnType() == void.class &&
+								(returnType.equals(Void.class) || returnType.equals(void.class)))) {
+							return method;
+						}
+						throw new ReflectionError(
+								cls, 
+								"The method annotated with @Key does not return type: "+returnType.getName());
+					}
+				}
+			}
+		}
+		throw new MissingAnnotationError(cls, annType, "on methods returning: "+returnType.getName()+" with "+argCount+" parameters");
 	}
 
 }

@@ -45,4 +45,22 @@ public class DefaultKeySetterTest {
 		assertThat(entity.aKey).isEqualTo("UPDATED_KEY");
 	}
 
+	@Test
+	public void testDefaultKeySetterGetsAnontatedFieldWithoutKeyType() throws Exception {
+		DefaultKeySetter<String, TypeWithKeyField> keySetter = new DefaultKeySetter(TypeWithKeyField.class);
+		TypeWithKeyField entity = new TypeWithKeyField("KEY", "NOT_KEY");
+		assertThat(keySetter.getKeySetter()).isNotNull();
+		keySetter.set(entity, "UPDATED_KEY");
+		assertThat(entity.aKey).isEqualTo("UPDATED_KEY");
+	}
+
+	@Test
+	public void testDefaultKeySetterGetsAnontatedMemberWithoutKeyType() throws Exception {
+		DefaultKeySetter<String, TypeWithKeyMember> keySetter = new DefaultKeySetter(TypeWithKeyMember.class);
+		TypeWithKeyMember entity = new TypeWithKeyMember("KEY", "NOT_KEY");
+		assertThat(keySetter.getKeySetter()).isNotNull();
+		keySetter.set(entity, "UPDATED_KEY");
+		assertThat(entity.aKey).isEqualTo("UPDATED_KEY");
+	}
+
 }

@@ -28,7 +28,7 @@ public class DefaultKeyGetterTest {
 	}
 
 	@Test
-	public void testDefaultKeYGetterGetsAnontatedField() throws Exception {
+	public void testDefaultKeyGetterGetsAnontatedField() throws Exception {
 		DefaultKeyGetter<String, TypeWithKeyField> keyGetter = new DefaultKeyGetter(String.class, TypeWithKeyField.class);
 		TypeWithKeyField entity = new TypeWithKeyField("KEY", "NOT_KEY");
 		assertThat(keyGetter.getKeyGetter()).isNotNull();
@@ -36,8 +36,24 @@ public class DefaultKeyGetterTest {
 	}
 
 	@Test
-	public void testDefaultKeYGetterGetsAnontatedMember() throws Exception {
+	public void testDefaultKeyGetterGetsAnontatedMember() throws Exception {
 		DefaultKeyGetter<String, TypeWithKeyMember> keyGetter = new DefaultKeyGetter(String.class, TypeWithKeyMember.class);
+		TypeWithKeyMember entity = new TypeWithKeyMember("KEY", "NOT_KEY");
+		assertThat(keyGetter.getKeyGetter()).isNotNull();
+		assertThat(keyGetter.get(entity)).isEqualTo("KEY");
+	}
+
+	@Test
+	public void testDefaultKeyGetterGetsAnontatedFieldWithoutKeyType() throws Exception {
+		DefaultKeyGetter<String, TypeWithKeyField> keyGetter = new DefaultKeyGetter(TypeWithKeyField.class);
+		TypeWithKeyField entity = new TypeWithKeyField("KEY", "NOT_KEY");
+		assertThat(keyGetter.getKeyGetter()).isNotNull();
+		assertThat(keyGetter.get(entity)).isEqualTo("KEY");
+	}
+
+	@Test
+	public void testDefaultKeyGetterGetsAnontatedMemberWithoutKeyType() throws Exception {
+		DefaultKeyGetter<String, TypeWithKeyMember> keyGetter = new DefaultKeyGetter(TypeWithKeyMember.class);
 		TypeWithKeyMember entity = new TypeWithKeyMember("KEY", "NOT_KEY");
 		assertThat(keyGetter.getKeyGetter()).isNotNull();
 		assertThat(keyGetter.get(entity)).isEqualTo("KEY");
