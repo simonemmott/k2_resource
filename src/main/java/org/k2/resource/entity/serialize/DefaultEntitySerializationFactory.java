@@ -12,9 +12,13 @@ import org.k2.resource.entity.key.DefaultKeySetter;
 import org.k2.resource.entity.key.KeyGetter;
 import org.k2.resource.entity.key.KeySetter;
 
+import lombok.Getter;
+
 public class DefaultEntitySerializationFactory<K,E> implements EntitySerializationFactory<K,E> {
 	
+	@Getter
 	private final Class<K> keyType;
+	@Getter
 	private final Class<E> entityType;
 	private final EntitySerializer<E> serializer;
 	private final EntityDeserializer<E> deserializer;
