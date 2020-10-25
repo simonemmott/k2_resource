@@ -48,16 +48,16 @@ public class DefaultKeySerializer<K> implements KeySerializer<K> {
 			this.keySerializer = (KeySerializer<K>) getDefaultStringSerializer();
 			return;
 		}
-		if (keyType.isAssignableFrom(Number.class)) {
+		if (keyType == Double.class) {
+			this.keySerializer = (KeySerializer<K>) getDefaultDoubleSerializer();
+			return;
+		}
+		if (Number.class.isAssignableFrom(keyType)) {
 			this.keySerializer = (KeySerializer<K>) getDefaultNumberSerializer();
 			return;
 		}
-		if (keyType.isAssignableFrom(Date.class)) {
+		if (Date.class.isAssignableFrom(keyType)) {
 			this.keySerializer = (KeySerializer<K>) getDefaultDateSerializer();
-			return;
-		}
-		if (keyType == Double.class) {
-			this.keySerializer = (KeySerializer<K>) getDefaultDoubleSerializer();
 			return;
 		}
 		if (keyType == Boolean.class) {

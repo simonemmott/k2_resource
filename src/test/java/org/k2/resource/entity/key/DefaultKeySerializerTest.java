@@ -36,6 +36,12 @@ public class DefaultKeySerializerTest {
 		assertThat(DefaultKeySerializer
 				.getDefaultNumberSerializer()
 				.serialize(10000000000000000L)).isEqualTo("10000000000000000");
+		assertThat(new DefaultKeySerializer<Integer>(Integer.class).serialize(123456789))
+		.isEqualTo("123456789");
+		assertThat(new DefaultKeySerializer<Long>(Long.class).serialize(1234567890123456789L))
+		.isEqualTo("1234567890123456789");
+		assertThat(new DefaultKeySerializer<Long>(Long.class).serialize(10000000000000000L))
+		.isEqualTo("10000000000000000");
 	}
 
 	@Test
@@ -43,6 +49,8 @@ public class DefaultKeySerializerTest {
 		assertThat(DefaultKeySerializer
 				.getDefaultDoubleSerializer()
 				.serialize(123456789.12345678d)).isEqualTo("123456789.12345678");
+		assertThat(new DefaultKeySerializer<Double>(Double.class).serialize(123456789.12345678d))
+			.isEqualTo("123456789.12345678");
 	}
 
 	@Test
@@ -53,6 +61,10 @@ public class DefaultKeySerializerTest {
 		assertThat(DefaultKeySerializer
 				.getDefaultStringSerializer()
 				.serialize("hellow world!")).isEqualTo("hellow+world%21");
+		assertThat(new DefaultKeySerializer<String>(String.class).serialize("!@£$%^&*() `~"))
+		.isEqualTo("%21%40%C2%A3%24%25%5E%26*%28%29+%60%7E");
+		assertThat(new DefaultKeySerializer<String>(String.class).serialize("hellow world!"))
+		.isEqualTo("hellow+world%21");
 	}
 
 	@Test
@@ -60,6 +72,8 @@ public class DefaultKeySerializerTest {
 		assertThat(DefaultKeySerializer
 				.getDefaultDateSerializer()
 				.serialize(new Date(123456789012345L))).isEqualTo("123456789012345");
+		assertThat(new DefaultKeySerializer<Date>(Date.class).serialize(new Date(123456789012345L)))
+		.isEqualTo("123456789012345");
 	}
 
 	@Test
@@ -67,6 +81,8 @@ public class DefaultKeySerializerTest {
 		assertThat(DefaultKeySerializer
 				.getDefaultObjectSerializer()
 				.serialize(new SomeKey("ABCD", 1234, new Date(12345))))
+		.isEqualTo("H4sIAAAAAAAAAKtWKs7PTQ0uKcrMS1eyUnJ0cnZR0gGLeeaVpKanFilZGRoZm0CEXBJLUiF801oAJ5GFSzkAAAA=");
+		assertThat(new DefaultKeySerializer<SomeKey>(SomeKey.class).serialize(new SomeKey("ABCD", 1234, new Date(12345))))
 		.isEqualTo("H4sIAAAAAAAAAKtWKs7PTQ0uKcrMS1eyUnJ0cnZR0gGLeeaVpKanFilZGRoZm0CEXBJLUiF801oAJ5GFSzkAAAA=");
 	}
 

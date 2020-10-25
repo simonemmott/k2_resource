@@ -30,6 +30,8 @@ public class DefaultKeyDeserializerTest {
 		assertThat(DefaultKeyDeserializer
 				.getDefaultIntegerDeserializer()
 				.deserialize("123")).isEqualTo(123);
+		assertThat(new DefaultKeyDeserializer<Integer>(Integer.class).deserialize("123"))
+			.isEqualTo(123);
 	}
 
 	@Test
@@ -37,6 +39,8 @@ public class DefaultKeyDeserializerTest {
 		assertThat(DefaultKeyDeserializer
 				.getDefaultLongDeserializer()
 				.deserialize("1234567890123456789")).isEqualTo(1234567890123456789L);
+		assertThat(new DefaultKeyDeserializer<Long>(Long.class).deserialize("1234567890123456789"))
+			.isEqualTo(1234567890123456789L);
 	}
 
 	@Test
@@ -44,6 +48,8 @@ public class DefaultKeyDeserializerTest {
 		assertThat(DefaultKeyDeserializer
 				.getDefaultFloatDeserializer()
 				.deserialize("123.456")).isEqualTo(123.456f);
+		assertThat(new DefaultKeyDeserializer<Float>(Float.class).deserialize("123.456"))
+			.isEqualTo(123.456f);
 	}
 
 	@Test
@@ -51,6 +57,8 @@ public class DefaultKeyDeserializerTest {
 		assertThat(DefaultKeyDeserializer
 				.getDefaultDoubleDeserializer()
 				.deserialize("123456789.12345678")).isEqualTo(123456789.12345678d);
+		assertThat(new DefaultKeyDeserializer<Double>(Double.class).deserialize("123456789.12345678"))
+			.isEqualTo(123456789.12345678d);
 	}
 
 	@Test
@@ -58,9 +66,13 @@ public class DefaultKeyDeserializerTest {
 		assertThat(DefaultKeyDeserializer
 				.getDefaultStringDeserializer()
 				.deserialize("%21%40%C2%A3%24%25%5E%26*%28%29+%60%7E")).isEqualTo("!@£$%^&*() `~");
+		assertThat(new DefaultKeyDeserializer<String>(String.class).deserialize("%21%40%C2%A3%24%25%5E%26*%28%29+%60%7E"))
+			.isEqualTo("!@£$%^&*() `~");
 		assertThat(DefaultKeyDeserializer
 				.getDefaultStringDeserializer()
 				.deserialize("hellow+world%21")).isEqualTo("hellow world!");
+		assertThat(new DefaultKeyDeserializer<String>(String.class).deserialize("hellow+world%21"))
+			.isEqualTo("hellow world!");
 	}
 
 	@Test
@@ -68,6 +80,8 @@ public class DefaultKeyDeserializerTest {
 		assertThat(DefaultKeyDeserializer
 				.getDefaultDateDeserializer()
 				.deserialize("123456789012345")).isEqualTo(new Date(123456789012345L));
+		assertThat(new DefaultKeyDeserializer<Date>(Date.class).deserialize("123456789012345"))
+			.isEqualTo(new Date(123456789012345L));
 	}
 
 	@Test
@@ -76,6 +90,8 @@ public class DefaultKeyDeserializerTest {
 				.getDefaultObjectDeserializer(SomeKey.class)
 				.deserialize("H4sIAAAAAAAAAKtWKs7PTQ0uKcrMS1eyUnJ0cnZR0gGLeeaVpKanFilZGRoZm0CEXBJLUiF801oAJ5GFSzkAAAA="))
 		.isEqualTo(new SomeKey("ABCD", 1234, new Date(12345)));
+		assertThat(new DefaultKeyDeserializer<SomeKey>(SomeKey.class).deserialize("H4sIAAAAAAAAAKtWKs7PTQ0uKcrMS1eyUnJ0cnZR0gGLeeaVpKanFilZGRoZm0CEXBJLUiF801oAJ5GFSzkAAAA="))
+			.isEqualTo(new SomeKey("ABCD", 1234, new Date(12345)));
 	}
 
 }

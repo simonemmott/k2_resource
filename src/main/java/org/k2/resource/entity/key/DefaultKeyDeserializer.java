@@ -125,8 +125,7 @@ public class DefaultKeyDeserializer<K> implements KeyDeserializer<K> {
 
 	@Override
 	public K deserialize(String keyStr) {
-		// TODO Auto-generated method stub
-		return null;
+		return keyDeserializer.deserialize(keyStr);
 	}
 
 }
