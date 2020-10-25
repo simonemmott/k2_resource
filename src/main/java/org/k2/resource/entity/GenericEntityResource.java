@@ -9,6 +9,8 @@ import org.k2.resource.MetaResource;
 import org.k2.resource.Resource;
 import org.k2.resource.binary.BinaryResource;
 import org.k2.resource.binary.exception.BinaryResourceInitializeException;
+import org.k2.resource.entity.exception.EntityConfigurationException;
+import org.k2.resource.entity.serialize.DefaultEntitySerializationFactory;
 import org.k2.resource.entity.serialize.EntitySerializationFactory;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
@@ -20,7 +22,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import lombok.Getter;
 
-public class EntityResource<K,E> implements Resource<K,E> {
+public class GenericEntityResource<K,E> implements Resource<K,E> {
 	
 	private final BinaryResource resource;
 	
@@ -32,7 +34,44 @@ public class EntityResource<K,E> implements Resource<K,E> {
 		return mapper;
 	}
 
-	public EntityResource(
+	public GenericEntityResource(
+			Class<K> keyType, 
+			Class<E> entityType,
+			File dir) throws BinaryResourceInitializeException, EntityConfigurationException {
+		
+		this.resource = new BinaryResource(
+				dir, 
+				new ThreadLocal<Checksum>(), 
+				new DefaultEntitySerializationFactory(keyType, entityType).create(keyType, entityType),
+				defaultMetaMapper());
+		if (!( resource.getMetaData() instanceof MetaEntityResource)) 
+			throw new BinaryResourceInitializeException("Resource meta data is not applicable to an Entity resource", dir);
+		if (!((MetaEntityResource)resource.getMetaData()).getKeyType().equals(keyType)) 
+			throw new BinaryResourceInitializeException("Resource meta data key type missmatch", dir);
+		if (!((MetaEntityResource)resource.getMetaData()).getEntityType().equals(entityType)) 
+			throw new BinaryResourceInitializeException("Resource meta data entity type missmatch", dir);
+	}
+
+	public GenericEntityResource(
+			Class<K> keyType, 
+			Class<E> entityType,
+			File dir, 
+			ThreadLocal<Checksum> checksum) throws BinaryResourceInitializeException, EntityConfigurationException {
+		
+		this.resource = new BinaryResource(
+				dir, 
+				checksum, 
+				new DefaultEntitySerializationFactory(keyType, entityType).create(keyType, entityType),
+				defaultMetaMapper());
+		if (!( resource.getMetaData() instanceof MetaEntityResource)) 
+			throw new BinaryResourceInitializeException("Resource meta data is not applicable to an Entity resource", dir);
+		if (!((MetaEntityResource)resource.getMetaData()).getKeyType().equals(keyType)) 
+			throw new BinaryResourceInitializeException("Resource meta data key type missmatch", dir);
+		if (!((MetaEntityResource)resource.getMetaData()).getEntityType().equals(entityType)) 
+			throw new BinaryResourceInitializeException("Resource meta data entity type missmatch", dir);
+	}
+
+	public GenericEntityResource(
 			Class<K> keyType, 
 			Class<E> entityType,
 			File dir, 
