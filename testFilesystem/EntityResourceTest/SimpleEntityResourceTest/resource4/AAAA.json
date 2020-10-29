@@ -1,1 +1,5 @@
-{"key":"AAAA","name":"AAAA Name","data":123}
+{
+  "key" : "AAAA",
+  "name" : "AAAA Name",
+  "data" : 123
+}

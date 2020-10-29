@@ -11,5 +11,6 @@ public class MetaEntityResource extends MetaResource {
 
 	Class<?> keyType;
 	Class<?> entityType;
+	boolean prettyPrint = true;
 
 }

@@ -3,6 +3,7 @@ package org.k2.resource.entity.serialize;
 import org.k2.resource.binary.BinaryEntityDeserializer;
 import org.k2.resource.binary.KeyDeserializer;
 import org.k2.resource.binary.KeySerializer;
+import org.k2.resource.entity.MetaEntityResource;
 import org.k2.resource.entity.exception.EntityConfigurationException;
 import org.k2.resource.entity.exception.KeyDefinitionException;
 import org.k2.resource.entity.key.DefaultKeyDeserializer;
@@ -27,10 +28,10 @@ public class DefaultEntitySerializationFactory<K,E> implements EntitySerializati
 	private final KeySerializer<K> keySerializer;
 	private final KeyDeserializer<K> keyDeserializer;
 
-	public DefaultEntitySerializationFactory(Class<K> keyType, Class<E> entityType) throws EntityConfigurationException {
+	public DefaultEntitySerializationFactory(Class<K> keyType, Class<E> entityType, MetaEntityResource metaData) throws EntityConfigurationException {
 		this.keyType = keyType;
 		this.entityType = entityType;
-		this.serializer = new DefaultEntitySerializer<E>(entityType);
+		this.serializer = new DefaultEntitySerializer<E>(entityType, metaData);
 		this.deserializer = new DefaultEntityDeserializer<E>(entityType);
 		this.keyGetter = new DefaultKeyGetter<K,E>(keyType, entityType);
 		this.keySetter = new DefaultKeySetter<K,E>(keyType, entityType);

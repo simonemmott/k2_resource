@@ -36,7 +36,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	public final static int NEW_ENTITY = -1;
 	public final static int DELETED = -2;
 
-	private static MetaResource loadMetaResource(File dir, ObjectMapper metaMapper) throws BinaryResourceInitializeException {
+	public static MetaResource loadMetaResource(File dir, ObjectMapper metaMapper) throws BinaryResourceInitializeException {
 		File metaResourceFile = new File(dir.getPath()+File.separatorChar+"__meta__.yml");
 		if (!metaResourceFile.exists()) return new MetaResource().setDatafileExtension("json");
 		try {

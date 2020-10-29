@@ -47,7 +47,8 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 			File dir) throws BinaryResourceInitializeException, EntityConfigurationException {
 		this.entityType = entityType;
 		this.keyType = keyType;
-		this.entitySerialization = (EntitySerialization<K,E>) new DefaultEntitySerializationFactory(keyType, entityType)
+		MetaEntityResource metaData = (MetaEntityResource) BinaryResource.loadMetaResource(dir, defaultMetaMapper());
+		this.entitySerialization = (EntitySerialization<K,E>) new DefaultEntitySerializationFactory(keyType, entityType, metaData)
 				.create(keyType, entityType);
 		this.resource = new BinaryResource(
 				dir, 
@@ -70,7 +71,8 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 		
 		this.entityType = entityType;
 		this.keyType = keyType;
-		this.entitySerialization = (EntitySerialization<K,E>) new DefaultEntitySerializationFactory<K,E>(keyType, entityType)
+		MetaEntityResource metaData = (MetaEntityResource) BinaryResource.loadMetaResource(dir, defaultMetaMapper());
+		this.entitySerialization = (EntitySerialization<K,E>) new DefaultEntitySerializationFactory<K,E>(keyType, entityType, metaData)
 				.create(keyType, entityType);
 		this.resource = new BinaryResource(
 				dir, 
