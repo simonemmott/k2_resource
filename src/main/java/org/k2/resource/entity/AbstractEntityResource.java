@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.Checksum;
 
+import org.k2.resource.KeyGenerator;
 import org.k2.resource.MetaResource;
 import org.k2.resource.Resource;
 import org.k2.resource.binary.BinaryEntity;
@@ -78,8 +79,10 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 				defaultMetaMapper());
 		if (!( resource.getMetaData() instanceof MetaEntityResource)) 
 			throw new BinaryResourceInitializeException("Resource meta data is not applicable to an Entity resource", dir);
-		if (!((MetaEntityResource)resource.getMetaData()).getKeyType().equals(keyType)) 
+		if (!((MetaEntityResource)resource.getMetaData()).getKeyType().equals(keyType)) {
+			System.out.println(((MetaEntityResource)resource.getMetaData()).getKeyType());
 			throw new BinaryResourceInitializeException("Resource meta data key type missmatch", dir);
+		}
 		if (!((MetaEntityResource)resource.getMetaData()).getEntityType().equals(entityType)) 
 			throw new BinaryResourceInitializeException("Resource meta data entity type missmatch", dir);
 	}
@@ -138,50 +141,98 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 
 	@Override
 	public E update(K key, E obj) throws MissingKeyError, MutatingEntityError {
-		// TODO Auto-generated method stub
-		return null;
+		ResourceSession sess = getSession();
+		if (sess.isDeleted(entityType, key)) {
+			throw new MutatingEntityError("Unable to update an object which has already been deleted");
+		}
+		long checksum = sess.checksum(entityType, key);
+		String keyStr = entitySerialization.getKeySerializer().serialize(key);
+		BinaryEntity be = resource.update(keyStr, new BinaryEntityImpl(keyStr, entitySerialization.getSerializer().serialize(obj), checksum));
+		sess.put(entityType, key, obj, be.getChecksum());
+		return obj;
 	}
 
 	@Override
 	public E save(E obj) throws MissingKeyError, MutatingEntityError, DuplicateKeyError {
-		// TODO Auto-generated method stub
-		return null;
+		ResourceSession sess = getSession();
+		K key = entitySerialization.getKeyGetter().get(obj);
+		if (key == null) {
+			if (entitySerialization.getKeyGenerator() != null) {
+				key = entitySerialization.getKeyGenerator().generate();
+				entitySerialization.getKeySetter().set(obj, key);
+			} else {
+				throw new MissingKeyError("No key and no key generator");
+			}
+		}
+		if (sess.has(entityType, key)) {
+			return update(key, obj);
+		} else {
+			return create(key, obj);
+		}
 	}
 
 	@Override
 	public List<E> fetch() {
-		// TODO Auto-generated method stub
-		return null;
+		ResourceSession sess = getSession();
+		List<E> items = sess.fetch(entityType);
+		for (BinaryEntity be : resource.fetch()) {
+			E obj = entitySerialization.getDeserializer().deserialize(be.getData());
+			K key = entitySerialization.getKeyGetter().get(obj);
+			if (!items.contains(obj) && !sess.isDeleted(entityType, key)) {
+				items.add(obj);
+				sess.put(entityType, key, obj, be.getChecksum());				
+			}
+		}
+		return items;
 	}
 
 	@Override
 	public E remove(K key) throws MissingKeyError, MutatingEntityError {
-		// TODO Auto-generated method stub
-		return null;
+		ResourceSession sess = getSession();
+		BinaryEntity be = resource.remove(entitySerialization.getKeySerializer().serialize(key));
+		E obj = entitySerialization.getDeserializer().deserialize(be.getData());
+		if (sess.has(entityType, key)) {
+			sess.delete(entityType, key);
+		}
+		return obj;
 	}
 
 	@Override
 	public void delete(E obj) throws MissingKeyError, MutatingEntityError {
-		// TODO Auto-generated method stub
-		
+		ResourceSession sess = getSession();
+		K key = entitySerialization.getKeyGetter().get(obj);
+		if (key == null) {
+			throw new MissingKeyError("No key during delete");
+		}
+		remove(key);
 	}
 
 	@Override
 	public int count() {
-		// TODO Auto-generated method stub
-		return 0;
+		return keys().size();
 	}
 
 	@Override
 	public boolean exists(K key) {
-		// TODO Auto-generated method stub
-		return false;
+		ResourceSession sess = getSession();
+		if (sess.has(entityType, key)) {
+			if (sess.isDeleted(entityType, key)) return false;
+			return true;
+		}
+		return resource.exists(entitySerialization.getKeySerializer().serialize(key));
 	}
 
 	@Override
 	public Set<K> keys() {
-		// TODO Auto-generated method stub
-		return null;
+		ResourceSession sess = getSession();
+		Set<K> keys = sess.keys(entityType, keyType);
+		for (String keyStr : resource.keys()) {
+			K key = entitySerialization.getKeyDeserializer().deserialize(keyStr);
+			if (!keys.contains(key)) {
+				keys.add(key);
+			}
+		}
+		return keys;
 	}
 
 }

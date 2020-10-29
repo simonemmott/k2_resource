@@ -1,0 +1,3 @@
+datafileExtension: json
+keyType: java.lang.String
+entityType: org.k2.resource.entity.simple.SimpleEntity

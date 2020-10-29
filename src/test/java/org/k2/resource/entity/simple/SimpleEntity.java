@@ -3,6 +3,7 @@ package org.k2.resource.entity.simple;
 import org.k2.resource.entity.annotation.Key;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class SimpleEntity {
 	
 	@Key

@@ -36,7 +36,7 @@ public class MetaEntityResourceDeserializer extends StdDeserializer<MetaResource
 		}
 		if (node.has("entityType")) {
 			try {
-				meta.setKeyType(Class.forName(node.get("entityType").asText()));
+				meta.setEntityType(Class.forName(node.get("entityType").asText()));
 			} catch (ClassNotFoundException err) {
 				throw new IOException("Unable to load the entities key type", err);
 			}

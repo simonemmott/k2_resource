@@ -249,7 +249,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 
 	@Override
 	public BinaryEntity update(String key, BinaryEntity obj) throws MissingKeyError, MutatingEntityError {
-		if (obj.isNew()) throw new MutatingEntityError(key, "The RefIten is new during update");
+		if (obj.isNew()) throw new MutatingEntityError(key, "The RefItem is new during update");
 		if (obj.isDeleted()) throw new MutatingEntityError(key, "The RefItem is deleted during update");
 		if (!index.containsKey(key)) throw new MissingKeyError(key);
 		obj.setKey(key);

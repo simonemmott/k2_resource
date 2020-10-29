@@ -1,5 +1,6 @@
 package org.k2.resource.entity.serialize;
 
+import org.k2.resource.KeyGenerator;
 import org.k2.resource.binary.BinaryEntity;
 import org.k2.resource.binary.BinaryEntityDeserializer;
 import org.k2.resource.binary.KeyDeserializer;
@@ -20,6 +21,7 @@ public class EntitySerialization<K,E> implements BinaryEntityDeserializer{
 	private KeySetter<K,E> keySetter;
 	private KeySerializer<K> keySerializer;
 	private KeyDeserializer<K> keyDeserializer;
+	private KeyGenerator<K> keyGenerator;
 	
 	public EntitySerialization<K,E> setSerializer(EntitySerializer<E> serializer) {
 		this.serializer = serializer;
@@ -48,6 +50,11 @@ public class EntitySerialization<K,E> implements BinaryEntityDeserializer{
 	
 	public EntitySerialization<K,E> setKeyDeserializer(KeyDeserializer<K> keyDeserializer) {
 		this.keyDeserializer = keyDeserializer;
+		return this;
+	}
+	
+	public EntitySerialization<K,E> setKeyGenerator(KeyGenerator<K> keyGenerator) {
+		this.keyGenerator = keyGenerator;
 		return this;
 	}
 	

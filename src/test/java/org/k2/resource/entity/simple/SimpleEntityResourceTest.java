@@ -102,7 +102,12 @@ class SimpleEntityResourceTest {
 	@Test
 	void testCreate() throws Exception {
 		File resourceDir = new File("testFilesystem/EntityResourceTest/SimpleEntityResourceTest/resource2");
-		FileUtils.cleanDirectory(resourceDir);
+		FileUtils.listFiles(resourceDir, null, false).stream()
+		.forEach(file -> {
+			if (!file.getName().equals("__meta__.yml")) {
+				file.delete();
+			}
+		});
 		File dataFile = new File("testFilesystem/EntityResourceTest/SimpleEntityResourceTest/resource2/XXXX.json");
 		if (dataFile.exists()) dataFile.delete();
 		SimpleEntityResource<String,SimpleEntity> resource = new SimpleEntityResource<>(
@@ -139,7 +144,12 @@ class SimpleEntityResourceTest {
 	@Test
 	void testUpdate() throws Exception {
 		File resourceDir = new File("testFilesystem/EntityResourceTest/SimpleEntityResourceTest/resource3");
-		FileUtils.cleanDirectory(resourceDir);
+		FileUtils.listFiles(resourceDir, null, false).stream()
+		.forEach(file -> {
+			if (!file.getName().equals("__meta__.yml")) {
+				file.delete();
+			}
+		});
 		SimpleEntityResource<String,SimpleEntity> resource = new SimpleEntityResource<>(
 				String.class, 
 				SimpleEntity.class, 
@@ -162,7 +172,12 @@ class SimpleEntityResourceTest {
 	@Test
 	void testSaveCallsCreateWhenObjIsNew() throws Exception {
 		File resourceDir = new File("testFilesystem/EntityResourceTest/SimpleEntityResourceTest/resource4");
-		FileUtils.cleanDirectory(resourceDir);
+		FileUtils.listFiles(resourceDir, null, false).stream()
+		.forEach(file -> {
+			if (!file.getName().equals("__meta__.yml")) {
+				file.delete();
+			}
+		});
 		SimpleEntityResource<String,SimpleEntity> resource = new SimpleEntityResource<>(
 				String.class, 
 				SimpleEntity.class, 
@@ -184,7 +199,12 @@ class SimpleEntityResourceTest {
 	@Test
 	void testSaveCallsUpdateWhenObjIsNotNew() throws Exception {
 		File resourceDir = new File("testFilesystem/EntityResourceTest/SimpleEntityResourceTest/resource4");
-		FileUtils.cleanDirectory(resourceDir);
+		FileUtils.listFiles(resourceDir, null, false).stream()
+				.forEach(file -> {
+					if (!file.getName().equals("__meta__.yml")) {
+						file.delete();
+					}
+				});
 		SimpleEntityResource<String,SimpleEntity> resource = new SimpleEntityResource<>(
 				String.class, 
 				SimpleEntity.class, 
@@ -208,7 +228,12 @@ class SimpleEntityResourceTest {
 	@Test
 	void testRemove() throws Exception {
 		File resourceDir = new File("testFilesystem/EntityResourceTest/SimpleEntityResourceTest/resource5");
-		FileUtils.cleanDirectory(resourceDir);
+		FileUtils.listFiles(resourceDir, null, false).stream()
+		.forEach(file -> {
+			if (!file.getName().equals("__meta__.yml")) {
+				file.delete();
+			}
+		});
 		SimpleEntityResource<String,SimpleEntity> resource = new SimpleEntityResource<>(
 				String.class, 
 				SimpleEntity.class, 
@@ -231,7 +256,12 @@ class SimpleEntityResourceTest {
 	@Test
 	void testDelete() throws Exception {
 		File resourceDir = new File("testFilesystem/EntityResourceTest/SimpleEntityResourceTest/resource5");
-		FileUtils.cleanDirectory(resourceDir);
+		FileUtils.listFiles(resourceDir, null, false).stream()
+		.forEach(file -> {
+			if (!file.getName().equals("__meta__.yml")) {
+				file.delete();
+			}
+		});
 		SimpleEntityResource<String,SimpleEntity> resource = new SimpleEntityResource<>(
 				String.class, 
 				SimpleEntity.class, 
