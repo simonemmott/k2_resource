@@ -21,6 +21,14 @@ public class DuplicateKeyError extends AbstractKeyError {
 		super(key, buildMessage(key), cause);
 	}
 
+	public DuplicateKeyError(String key, String message) {
+		super(key, buildMessage(key)+" - "+message);
+	}
+
+	public DuplicateKeyError(String key, String message, Throwable cause) {
+		super(key, buildMessage(key)+" - "+message, cause);
+	}
+
 	public DuplicateKeyError(String key, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(key, buildMessage(key), cause, enableSuppression, writableStackTrace);
 	}
