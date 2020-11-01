@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -14,15 +16,20 @@ import org.junit.rules.ExpectedException;
 import org.k2.resource.binary.BinaryEntityImpl;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
+import org.k2.resource.exception.UnexpectedResourceError;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class BinaryResourceTest {
 	
-	private static final ThreadLocal<Checksum> checksum = ThreadLocal.withInitial(
+	private static final ThreadLocal<MessageDigest> checksum = ThreadLocal.withInitial(
 			() -> {
-				return new CRC32();
+				try {
+					return MessageDigest.getInstance("MD5");
+				} catch (NoSuchAlgorithmException e) {
+					throw new UnexpectedResourceError("Unable to create MD5 digest");
+				}
 			});
 	
 	@Test
@@ -42,14 +49,14 @@ class BinaryResourceTest {
 		File fredFile = new File("testFilesystem/BinaryResourceTest/BS1/FredFlintstone.json");
 		assertThat(fred.getKey()).isEqualTo("FredFlintstone");
 		assertThat(fred.getData()).isEqualTo(FileUtils.readFileToByteArray(fredFile));
-		assertThat(fred.getChecksum()).isEqualTo(1301605181L);
+		assertThat(fred.getChecksum()).isEqualTo("a04b3a0ce6bb09772efb18abe0c41371");
 		
 		BinaryEntity barney = resource.get("BarneyRubble");
 		assertThat(barney).isNotNull();
 		File barneyFile = new File("testFilesystem/BinaryResourceTest/BS1/BarneyRubble.json");
 		assertThat(barney.getKey()).isEqualTo("BarneyRubble");
 		assertThat(barney.getData()).isEqualTo(FileUtils.readFileToByteArray(barneyFile));
-		assertThat(barney.getChecksum()).isEqualTo(4212237153L);
+		assertThat(barney.getChecksum()).isEqualTo("d70a99c9ba4449306a0803f8c297df7c");
 	}
 
 	@Test
@@ -90,12 +97,12 @@ class BinaryResourceTest {
 		File dataFile = new File("testFilesystem/BinaryResourceTest/testCreate/XXXX."
 				+resource.getDatafileExtension());
 		BinaryEntity be = new BinaryEntityImpl("XXXX", "AAAA".getBytes());
-		assertThat(be.getChecksum()).isEqualTo(-1);
+		assertThat(be.getChecksum()).isEqualTo("NEW_ENTITY");
 		
 		BinaryEntity savedBe = resource.create("XXXX", be);
 		
 		assertThat(savedBe).isEqualTo(be);
-		assertThat(savedBe.getChecksum()).isNotEqualTo(-1);
+		assertThat(savedBe.getChecksum()).isNotEqualTo("NEW_ENTITY");
 		assertThat(dataFile).exists();
 		assertThat(resource.keys()).contains("XXXX");
 		dataFile.delete();

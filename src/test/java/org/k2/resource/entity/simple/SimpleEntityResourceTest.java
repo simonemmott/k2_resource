@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -14,15 +16,20 @@ import org.junit.rules.ExpectedException;
 import org.k2.resource.binary.BinaryEntityImpl;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
+import org.k2.resource.exception.UnexpectedResourceError;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class SimpleEntityResourceTest {
 	
-	private static final ThreadLocal<Checksum> checksum = ThreadLocal.withInitial(
+	private static final ThreadLocal<MessageDigest> checksum = ThreadLocal.withInitial(
 			() -> {
-				return new CRC32();
+				try {
+					return MessageDigest.getInstance("MD5");
+				} catch (NoSuchAlgorithmException e) {
+					throw new UnexpectedResourceError("Unable to create MD5 digest");
+				}
 			});
 	
 	@Test

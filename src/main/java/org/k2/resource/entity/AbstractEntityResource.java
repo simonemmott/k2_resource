@@ -1,6 +1,8 @@
 package org.k2.resource.entity;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.Checksum;
@@ -19,6 +21,7 @@ import org.k2.resource.entity.serialize.EntitySerializationFactory;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
+import org.k2.resource.exception.UnexpectedResourceError;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -52,7 +55,13 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 				.create(keyType, entityType);
 		this.resource = new BinaryResource(
 				dir, 
-				new ThreadLocal<Checksum>(), 
+				ThreadLocal.withInitial(() -> {
+					try {
+						return MessageDigest.getInstance("MD5");
+					} catch (NoSuchAlgorithmException e) {
+						throw new UnexpectedResourceError("Unable to create MD5 digest");
+					}
+				}), 
 				this.entitySerialization,
 				defaultMetaMapper());
 		if (!( resource.getMetaData() instanceof MetaEntityResource)) 
@@ -67,7 +76,7 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 			Class<K> keyType, 
 			Class<E> entityType,
 			File dir, 
-			ThreadLocal<Checksum> checksum) throws BinaryResourceInitializeException, EntityConfigurationException {
+			ThreadLocal<MessageDigest> digest) throws BinaryResourceInitializeException, EntityConfigurationException {
 		
 		this.entityType = entityType;
 		this.keyType = keyType;
@@ -76,7 +85,7 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 				.create(keyType, entityType);
 		this.resource = new BinaryResource(
 				dir, 
-				checksum, 
+				digest, 
 				this.entitySerialization,
 				defaultMetaMapper());
 		if (!( resource.getMetaData() instanceof MetaEntityResource)) 
@@ -93,7 +102,7 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 			Class<K> keyType, 
 			Class<E> entityType,
 			File dir, 
-			ThreadLocal<Checksum> checksum,
+			ThreadLocal<MessageDigest> digest,
 			EntitySerializationFactory<K,E> serializationFactory) throws BinaryResourceInitializeException {
 		
 		this.entityType = entityType;
@@ -101,7 +110,7 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 		this.entitySerialization = (EntitySerialization<K,E>) serializationFactory.create(keyType, entityType);
 		this.resource = new BinaryResource(
 				dir, 
-				checksum, 
+				digest, 
 				this.entitySerialization,
 				defaultMetaMapper());
 		if (!( resource.getMetaData() instanceof MetaEntityResource)) 
@@ -147,7 +156,7 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 		if (sess.isDeleted(entityType, key)) {
 			throw new MutatingEntityError("Unable to update an object which has already been deleted");
 		}
-		long checksum = sess.checksum(entityType, key);
+		String checksum = sess.checksum(entityType, key);
 		String keyStr = entitySerialization.getKeySerializer().serialize(key);
 		BinaryEntity be = resource.update(keyStr, new BinaryEntityImpl(keyStr, entitySerialization.getSerializer().serialize(obj), checksum));
 		sess.put(entityType, key, obj, be.getChecksum());

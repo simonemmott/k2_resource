@@ -40,7 +40,7 @@ public class DefaultEntitySerializationFactory<K,E> implements EntitySerializati
 	}
 
 	@Override
-	public BinaryEntityDeserializer create(Class<K> keyType, Class<E> entityType) {
+	public EntitySerialization<K,E> create(Class<K> keyType, Class<E> entityType) {
 		return new EntitySerialization<K,E>()
 				.setSerializer(serializer)
 				.setDeserializer(deserializer)

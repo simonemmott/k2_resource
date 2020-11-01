@@ -59,7 +59,7 @@ public class EntitySerialization<K,E> implements BinaryEntityDeserializer{
 	}
 	
 	@Override
-	public BinaryEntity deserialize(String key, byte[] data, long checksum) {
+	public BinaryEntity deserialize(String key, byte[] data, String checksum) {
 		return new WrappedEntity<>(data, this, checksum);
 	}
 

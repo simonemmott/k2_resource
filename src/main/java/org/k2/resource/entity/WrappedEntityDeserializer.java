@@ -12,7 +12,7 @@ public class WrappedEntityDeserializer<K,E> implements BinaryEntityDeserializer 
 	}
 
 	@Override
-	public WrappedEntity<K,E> deserialize(String key, byte[] data, long checksum) {
+	public WrappedEntity<K,E> deserialize(String key, byte[] data, String checksum) {
 		return new WrappedEntity<>(data, serialization, checksum);
 	}
 

@@ -2,6 +2,7 @@ package org.k2.resource.json;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -54,7 +55,7 @@ public class JsonResource<K> implements Resource<K, JsonNode>{
 	
 	public JsonResource(
 			File dir,
-			ThreadLocal<Checksum> checksum,
+			ThreadLocal<MessageDigest> checksum,
 			KeyGetter<K> keyGetter,
 			KeySerializer<K> keySerializer,
 			KeyDeserializer<K> keyDeserializer,

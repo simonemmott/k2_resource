@@ -16,9 +16,9 @@ public class BinaryEntityImpl implements BinaryEntity {
 	private String key;
 	@Setter
 	private byte[] data;
-	private final long checksum;
+	private final String checksum;
 	
-	public BinaryEntityImpl(String key, byte[] data, long checksum) {
+	public BinaryEntityImpl(String key, byte[] data, String checksum) {
 		assert key != null;
 		this.key = key;
 		this.data = data;

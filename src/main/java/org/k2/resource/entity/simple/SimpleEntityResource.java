@@ -1,6 +1,7 @@
 package org.k2.resource.entity.simple;
 
 import java.io.File;
+import java.security.MessageDigest;
 import java.util.zip.Checksum;
 
 import org.k2.resource.binary.exception.BinaryResourceInitializeException;
@@ -23,26 +24,26 @@ public class SimpleEntityResource<K,E> extends AbstractEntityResource<K,E> {
 		this.session = session;
 	}
 
-	public SimpleEntityResource(Class<K> keyType, Class<E> entityType, File dir, ThreadLocal<Checksum> checksum) throws BinaryResourceInitializeException, EntityConfigurationException {
-		super(keyType, entityType, dir, checksum);
+	public SimpleEntityResource(Class<K> keyType, Class<E> entityType, File dir, ThreadLocal<MessageDigest> digest) throws BinaryResourceInitializeException, EntityConfigurationException {
+		super(keyType, entityType, dir, digest);
 		this.session = new SimpleResourceSession();
 	}
 
-	public SimpleEntityResource(Class<K> keyType, Class<E> entityType, File dir, ThreadLocal<Checksum> checksum,
+	public SimpleEntityResource(Class<K> keyType, Class<E> entityType, File dir, ThreadLocal<MessageDigest> digest,
 			ResourceSession session) throws BinaryResourceInitializeException, EntityConfigurationException {
-		super(keyType, entityType, dir, checksum);
+		super(keyType, entityType, dir, digest);
 		this.session = session;
 	}
 
-	public SimpleEntityResource(Class<K> keyType, Class<E> entityType, File dir, ThreadLocal<Checksum> checksum,
+	public SimpleEntityResource(Class<K> keyType, Class<E> entityType, File dir, ThreadLocal<MessageDigest> digest,
 			EntitySerializationFactory<K, E> serializationFactory, ResourceSession session) throws BinaryResourceInitializeException {
-		super(keyType, entityType, dir, checksum, serializationFactory);
+		super(keyType, entityType, dir, digest, serializationFactory);
 		this.session = session;
 	}
 
-	public SimpleEntityResource(Class<K> keyType, Class<E> entityType, File dir, ThreadLocal<Checksum> checksum,
+	public SimpleEntityResource(Class<K> keyType, Class<E> entityType, File dir, ThreadLocal<MessageDigest> digest,
 			EntitySerializationFactory<K, E> serializationFactory) throws BinaryResourceInitializeException {
-		super(keyType, entityType, dir, checksum, serializationFactory);
+		super(keyType, entityType, dir, digest, serializationFactory);
 		this.session = new SimpleResourceSession();
 	}
 

@@ -11,7 +11,7 @@ public interface ResourceSession {
 
 	boolean has(Class<?> entityType, Object key);
 
-	<E> void put(Class<E> entityType, Object key, E obj, long checksum);
+	<E> void put(Class<E> entityType, Object key, E obj, String checksum);
 
 	<E> List<E> fetch(Class<E> entityType);
 
@@ -21,6 +21,6 @@ public interface ResourceSession {
 
 	<K,E> Set<K> keys(Class<E> entityType, Class<K> keyType);
 
-	<E> long checksum(Class<E> entityType, Object key) throws MissingKeyError;
+	<E> String checksum(Class<E> entityType, Object key) throws MissingKeyError;
 
 }

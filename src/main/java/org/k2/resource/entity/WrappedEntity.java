@@ -21,7 +21,7 @@ public class WrappedEntity<K,E> implements BinaryEntity {
 	private E entity;
 	private final EntitySerialization<K,E> serialization;
 	@Getter
-	private final long checksum;
+	private final String checksum;
 	
 	public WrappedEntity(
 			E entity, 
@@ -34,7 +34,7 @@ public class WrappedEntity<K,E> implements BinaryEntity {
 	public WrappedEntity(
 			byte[] data,
 			EntitySerialization<K,E> serialization,
-			long checksum) {
+			String checksum) {
 		this.serialization = serialization;
 		this.entity = serialization.getDeserializer().deserialize(data);
 		this.checksum = checksum;

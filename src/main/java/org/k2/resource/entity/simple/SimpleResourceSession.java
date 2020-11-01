@@ -14,7 +14,7 @@ public class SimpleResourceSession implements ResourceSession {
 	
 	private class SessionEntity {
 		public Object obj;
-		public long checksum;
+		public String checksum;
 		public boolean deleted;
 	}
 	
@@ -56,7 +56,7 @@ public class SimpleResourceSession implements ResourceSession {
 	}
 
 	@Override
-	public <E> void put(Class<E> entityType, Object key, E obj, long checksum) {
+	public <E> void put(Class<E> entityType, Object key, E obj, String checksum) {
 		Map<Object, SessionEntity> entityCache = getEntityCache(entityType);
 		SessionEntity se = entityCache.get(key);
 		if (se == null) {
@@ -114,7 +114,7 @@ public class SimpleResourceSession implements ResourceSession {
 	}
 
 	@Override
-	public <E> long checksum(Class<E> entityType, Object key) throws MissingKeyError {
+	public <E> String checksum(Class<E> entityType, Object key) throws MissingKeyError {
 		Map<Object, SessionEntity> entityCache = getEntityCache(entityType);
 		SessionEntity se = entityCache.get(key);
 		if (se == null) {

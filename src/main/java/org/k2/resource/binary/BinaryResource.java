@@ -2,6 +2,7 @@ package org.k2.resource.binary;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,8 +34,8 @@ import lombok.Setter;
 
 public class BinaryResource implements Resource<String, BinaryEntity> {
 	
-	public final static int NEW_ENTITY = -1;
-	public final static int DELETED = -2;
+	public final static String NEW_ENTITY = "NEW_ENTITY";
+	public final static String DELETED = "DELETED";
 
 	public static MetaResource loadMetaResource(File dir, ObjectMapper metaMapper) throws BinaryResourceInitializeException {
 		File metaResourceFile = new File(dir.getPath()+File.separatorChar+"__meta__.yml");
@@ -64,7 +65,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	@Getter
 	private final File dir;
 	private final Map<String,BinaryResourceItem> index;
-	private final ThreadLocal<Checksum> checksum;
+	private final ThreadLocal<MessageDigest> digest;
 	private final KeyGenerator<String> generator;
 	private final BinaryEntityDeserializer deserializer;
 	@Getter
@@ -72,13 +73,13 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	
 	public BinaryResource(
 			File dir, 
-			ThreadLocal<Checksum> checksum, 
+			ThreadLocal<MessageDigest> digest, 
 			BinaryEntityDeserializer deserializer, 
 			ObjectMapper metaMapper) throws BinaryResourceInitializeException {
 		checkDir(dir);
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
-		this.checksum = checksum;
+		this.digest = digest;
 		this.generator = new DefaultKeyGenerator();
 		this.deserializer = deserializer;
 		this.metaData = loadMetaResource(dir, metaMapper);
@@ -87,12 +88,12 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	
 	public BinaryResource(
 			File dir, 
-			ThreadLocal<Checksum> checksum, 
+			ThreadLocal<MessageDigest> digest, 
 			BinaryEntityDeserializer deserializer) throws BinaryResourceInitializeException {
 		checkDir(dir);
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
-		this.checksum = checksum;
+		this.digest = digest;
 		this.generator = new DefaultKeyGenerator();
 		this.deserializer = deserializer;
 		this.metaData = loadMetaResource(dir, new ObjectMapper(new YAMLFactory()));
@@ -101,12 +102,12 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	
 	public BinaryResource(
 			File dir, 
-			ThreadLocal<Checksum> checksum,
+			ThreadLocal<MessageDigest> digest,
 			ObjectMapper metaMapper) throws BinaryResourceInitializeException {
 		checkDir(dir);
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
-		this.checksum = checksum;
+		this.digest = digest;
 		this.generator = new DefaultKeyGenerator();
 		this.deserializer = new DefaultBinaryEntityDeserializer();
 		this.metaData = loadMetaResource(dir, metaMapper);
@@ -115,11 +116,11 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	
 	public BinaryResource(
 			File dir, 
-			ThreadLocal<Checksum> checksum) throws BinaryResourceInitializeException {
+			ThreadLocal<MessageDigest> digest) throws BinaryResourceInitializeException {
 		checkDir(dir);
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
-		this.checksum = checksum;
+		this.digest = digest;
 		this.generator = new DefaultKeyGenerator();
 		this.deserializer = new DefaultBinaryEntityDeserializer();
 		this.metaData = loadMetaResource(dir, new ObjectMapper(new YAMLFactory()));
@@ -128,14 +129,14 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	
 	public BinaryResource(
 			File dir, 
-			ThreadLocal<Checksum> checksum, 
+			ThreadLocal<MessageDigest> digest, 
 			KeyGenerator<String> generator,
 			BinaryEntityDeserializer deserializer,
 			ObjectMapper metaMapper) throws BinaryResourceInitializeException {
 		checkDir(dir);
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
-		this.checksum = checksum;
+		this.digest = digest;
 		this.generator = generator;
 		this.deserializer = deserializer;
 		this.metaData = loadMetaResource(dir, metaMapper);
@@ -144,13 +145,13 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	
 	public BinaryResource(
 			File dir, 
-			ThreadLocal<Checksum> checksum, 
+			ThreadLocal<MessageDigest> digest, 
 			KeyGenerator<String> generator,
 			BinaryEntityDeserializer deserializer) throws BinaryResourceInitializeException {
 		checkDir(dir);
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
-		this.checksum = checksum;
+		this.digest = digest;
 		this.generator = generator;
 		this.deserializer = deserializer;
 		this.metaData = loadMetaResource(dir, new ObjectMapper(new YAMLFactory()));
@@ -159,13 +160,13 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	
 	public BinaryResource(
 			File dir, 
-			ThreadLocal<Checksum> checksum, 
+			ThreadLocal<MessageDigest> digest, 
 			KeyGenerator<String> generator,
 			ObjectMapper metaMapper) throws BinaryResourceInitializeException {
 		checkDir(dir);
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
-		this.checksum = checksum;
+		this.digest = digest;
 		this.generator = generator;
 		this.deserializer = new DefaultBinaryEntityDeserializer();
 		this.metaData = loadMetaResource(dir, metaMapper);
@@ -174,12 +175,12 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	
 	public BinaryResource(
 			File dir, 
-			ThreadLocal<Checksum> checksum, 
+			ThreadLocal<MessageDigest> digest, 
 			KeyGenerator<String> generator) throws BinaryResourceInitializeException {
 		checkDir(dir);
 		this.dir = dir;
 		this.index = new HashMap<String, BinaryResourceItem>();
-		this.checksum = checksum;
+		this.digest = digest;
 		this.generator = generator;
 		this.deserializer = new DefaultBinaryEntityDeserializer();
 		this.metaData = loadMetaResource(dir, new ObjectMapper(new YAMLFactory()));
@@ -201,7 +202,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 	private void loadResources() throws BinaryResourceInitializeException {
 		for (File resourceFile : readResourceFiles(dir)) {
 			try {
-				BinaryResourceItem indexItem = new BinaryResourceItem(this, resourceFile, checksum.get());
+				BinaryResourceItem indexItem = new BinaryResourceItem(this, resourceFile, digest.get());
 				index.put(indexItem.getKey(), indexItem);
 			} catch (IOException err) {
 				throw new BinaryResourceInitializeException(MessageFormat.format(
@@ -228,7 +229,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 		if (index.containsKey(key)) throw new DuplicateKeyError(key);
 		obj.setKey(key);
 		try {
-			BinaryResourceItem newItem = new BinaryResourceItem(this, obj, checksum.get());
+			BinaryResourceItem newItem = new BinaryResourceItem(this, obj, digest.get());
 			index.put(key, newItem);
 			return deserializer.deserialize(key, newItem.getBytes(), newItem.getChecksum());
 		} catch (IOException err) {
@@ -255,7 +256,7 @@ public class BinaryResource implements Resource<String, BinaryEntity> {
 		obj.setKey(key);
 		BinaryResourceItem item = index.get(key);
 		try {
-			item.update(obj, checksum.get());
+			item.update(obj, digest.get());
 			return deserializer.deserialize(key, item.getBytes(), item.getChecksum());
 		} catch (IOException err) {
 			throw new UnexpectedResourceError(
