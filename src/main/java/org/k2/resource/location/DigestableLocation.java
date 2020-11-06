@@ -3,6 +3,7 @@ package org.k2.resource.location;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 import java.util.Set;
 
 import org.k2.resource.MetaResource;
@@ -10,6 +11,7 @@ import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.ResourceConfigurationException;
 import org.k2.resource.exception.UnexpectedResourceError;
+import org.k2.resource.transaction.ResourceTransactionManager;
 
 public interface DigestableLocation {
 	
@@ -32,12 +34,28 @@ public interface DigestableLocation {
 		};
 	}
 	
-	static DigestableLocation create(File location) throws ResourceConfigurationException {
+	static DigestableLocation create(
+			File location) throws ResourceConfigurationException {
 		return DigestableLocation.create(location, defaultDigestor());
 	}
 
-	static DigestableLocation create(File location, Digestor digestor) throws ResourceConfigurationException {
+	static DigestableLocation create(
+			File location, 
+			Digestor digestor) throws ResourceConfigurationException {
 		return new SimpleDigestableLocation(location, digestor);
+	}
+	
+	static TxDigestableLocation create(
+			File location, 
+			ResourceTransactionManager txManager) throws ResourceConfigurationException {
+		return DigestableLocation.create(location, defaultDigestor(), txManager);
+	}
+
+	static TxDigestableLocation create(
+			File location, 
+			Digestor digestor, 
+			ResourceTransactionManager txManager) throws ResourceConfigurationException {
+		return new TxDigestableLocation(location, digestor, txManager);
 	}
 	
 	String getName();
@@ -59,5 +77,6 @@ public interface DigestableLocation {
 	void digest() throws ResourceConfigurationException;
 	File getLocation();
 	void clean();
+	Collection<? extends DigestableResource> getResources();
 
 }
