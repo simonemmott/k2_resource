@@ -58,5 +58,6 @@ public interface DigestableLocation {
 	void refresh();
 	void digest() throws ResourceConfigurationException;
 	File getLocation();
+	void clean();
 
 }

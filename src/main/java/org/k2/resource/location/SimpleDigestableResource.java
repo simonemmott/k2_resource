@@ -84,4 +84,18 @@ public class SimpleDigestableResource implements DigestableResource {
 		return location;
 	}
 
+	@Override
+	public void lock() {
+		//TODO
+		throw new RuntimeException("NOT_IMPLEMENTED");
+		
+	}
+
+	@Override
+	public void unlock() {
+		//TODO
+		throw new RuntimeException("NOT_IMPLEMENTED");
+		
+	}
+
 }

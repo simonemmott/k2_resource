@@ -21,5 +21,7 @@ public interface DigestableResource {
 	byte[] getDigest();
 	String getChecksum();
 	File getDatafile();
+	void lock();
+	void unlock();
 	
 }

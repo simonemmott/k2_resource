@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.Checksum;
 
 import org.k2.resource.KeyGenerator;
@@ -185,7 +186,8 @@ public abstract class AbstractEntityResource<K,E> implements Resource<K,E> {
 	@Override
 	public List<E> fetch() {
 		ResourceSession sess = getSession();
-		List<E> items = sess.fetch(entityType);
+//		Set<E> cachedSet = sess.fetch(entityType);
+		List<E> items = sess.fetch(entityType).stream().collect(Collectors.toList());
 		for (BinaryEntity be : resource.fetch()) {
 			E obj = entitySerialization.getDeserializer().deserialize(be.getData());
 			K key = entitySerialization.getKeyGetter().get(obj);

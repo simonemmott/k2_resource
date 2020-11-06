@@ -212,4 +212,12 @@ public class SimpleDigestableLocation implements DigestableLocation {
 		return locations.containsKey(name);
 	}
 
+	@Override
+	public void clean() {
+		for (DigestableResource resource : resources.values()) {
+			resource.getDatafile().delete();
+		}
+		
+	}
+
 }

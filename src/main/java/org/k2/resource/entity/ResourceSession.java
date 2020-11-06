@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.k2.resource.exception.MissingKeyError;
+import org.k2.resource.exception.MutatingEntityError;
 
 public interface ResourceSession {
 
@@ -13,11 +14,11 @@ public interface ResourceSession {
 
 	<E> void put(Class<E> entityType, Object key, E obj, String checksum);
 
-	<E> List<E> fetch(Class<E> entityType);
+	<E> Set<E> fetch(Class<E> entityType);
 
 	<E> boolean isDeleted(Class<E> entityType, Object key);
 
-	<E> E delete(Class<E> entityType, Object key) throws MissingKeyError;
+	<E> E delete(Class<E> entityType, Object key) throws MissingKeyError, MutatingEntityError;
 
 	<K,E> Set<K> keys(Class<E> entityType, Class<K> keyType);
 

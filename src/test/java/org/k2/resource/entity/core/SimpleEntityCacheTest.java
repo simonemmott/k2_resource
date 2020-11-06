@@ -26,6 +26,7 @@ import org.k2.resource.entity.serialize.EntitySerializer;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.ResourceConfigurationException;
 import org.k2.util.binary.BinaryUtils;
+import org.k2.util.object.ObjectUtils;
 import org.mockito.BDDMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.api.mockito.PowerMockito;
@@ -34,34 +35,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 @RunWith(PowerMockRunner.class)
 class SimpleEntityCacheTest {
 	
-	@Getter
-	@Setter
-	@AllArgsConstructor
-	@RefItem()
-	class TestEntity1 {		
-		@Key
-		private String key;
-	}
-	
-	@Getter
-	@Setter
-	@AllArgsConstructor
-	@RefItem()
-	class TestEntity2 {		
-		@Key
-		private String key;
-	}
-	
 	private SimpleEntityCache cache;
 	
 	static SimpleEntityCache testCache() {
 		SimpleEntityCache cache = new SimpleEntityCache();
-		try {
-		cache.serialize(TestEntity1.class, getEntitySerializer(TestEntity1.class));
-		cache.serialize(TestEntity2.class, getEntitySerializer(TestEntity2.class));
-		} catch (Exception err) {
-			err.printStackTrace();
-		}
 		return cache;
 	}
 	
@@ -173,11 +150,7 @@ class SimpleEntityCacheTest {
 		assertThat(cache.isChanged(TestEntity1.class, "1")).isTrue();
 		
 		TestEntity1 e1_2 = new TestEntity1("2");
-		byte[] data = cache.getEntitySerializer(TestEntity1.class).serialize(e1_2);
-		MessageDigest digest = cache.getDigest().get();
-		digest.update(data);
-		String checksum = BinaryUtils.hex(digest.digest());
-		cache.put(TestEntity1.class, "2", e1_2, checksum);
+		cache.put(TestEntity1.class, "2", e1_2, "checksum");
 		
 		assertThat(cache.isChanged(TestEntity1.class, "2")).isFalse();
 		e1_2.key="AAA";
