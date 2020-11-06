@@ -14,7 +14,7 @@ public class ResourceTransactionManager implements TransactionManager {
 	public ResourceTransactionManager(DigestableLocation dir) {
 		this.dir = dir;
 		this.threadLocalTransaction = ThreadLocal.withInitial(() -> {
-			return createTransaction();
+			return null;
 		});
 	}
 	
@@ -48,8 +48,19 @@ public class ResourceTransactionManager implements TransactionManager {
 	}
 
 	@Override
-	public Transaction getTransaction() {
-		return threadLocalTransaction.get();
+	public ResourceTransaction getTransaction() {
+		ResourceTransaction tx = threadLocalTransaction.get();
+		if (tx == null) {
+			tx = createTransaction();
+			threadLocalTransaction.set(tx);
+		}
+		return tx;
+	}
+
+	@Override
+	public boolean hasTransaction() {
+		ResourceTransaction tx = threadLocalTransaction.get();
+		return tx != null;
 	}
 
 }

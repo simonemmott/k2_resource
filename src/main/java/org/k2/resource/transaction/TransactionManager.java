@@ -8,6 +8,7 @@ public interface TransactionManager {
 	}
 	
 	Transaction getTransaction();
+	boolean hasTransaction();
 	
 	
 }

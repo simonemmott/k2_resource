@@ -2,6 +2,7 @@ package org.k2.resource.location;
 
 import java.io.File;
 
+import org.k2.resource.exception.EntityLockedError;
 import org.k2.resource.exception.ResourceConfigurationException;
 import org.k2.resource.location.DigestableLocation;
 
@@ -17,7 +18,7 @@ public interface DigestableResource {
 	
 	String getKey();
 	byte[] getData();
-	void setData(byte[] data);
+	void setData(byte[] data) throws EntityLockedError;
 	byte[] getDigest();
 	String getChecksum();
 	File getDatafile();

@@ -9,9 +9,11 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.k2.resource.exception.DuplicateKeyError;
+import org.k2.resource.exception.EntityLockedError;
 import org.k2.resource.exception.UnexpectedResourceError;
 import org.k2.resource.location.DigestableLocation;
 import org.k2.resource.location.DigestableResource;
+import org.k2.resource.location.TxDigestableResource;
 import org.k2.resource.transaction.exception.PreCommitException;
 import org.k2.resource.transaction.exception.RollbackException;
 
@@ -24,7 +26,7 @@ public class ResourceTransaction implements Transaction {
 	
 	private final DigestableLocation dir;
 	private final ResourceTransactionManager manager;
-	private final Map<DigestableResource, TransactionItem> resourcesMap = new HashMap<>();
+	private final Map<TxDigestableResource, TransactionItem> resourcesMap = new HashMap<>();
 	private boolean committed = false;
 
 	public ResourceTransaction(ResourceTransactionManager manager, DigestableLocation dir) {
@@ -53,7 +55,7 @@ public class ResourceTransaction implements Transaction {
 		}
 	}
 	
-	void put(DigestableResource resource, byte[] data) {
+	public void put(TxDigestableResource resource, byte[] data) throws EntityLockedError {
 		if (resourcesMap.containsKey(resource)) {
 			resourcesMap.get(resource).txResource.setData(data);
 		} else {
@@ -65,15 +67,25 @@ public class ResourceTransaction implements Transaction {
 		}
 	}
 	
-	byte[] getTransactionData(DigestableResource resource) {
-		if (resourcesMap.containsKey(resource)) {
-			return resourcesMap.get(resource).txResource.getData();
+	public byte[] getTransactionData(TxDigestableResource resource) {
+		TransactionItem txItem = resourcesMap.get(resource);
+		if (txItem != null) {
+			if (committed && txItem.txResource.getDatafile().exists()) {
+				return txItem.txResource.getData();
+			} else {
+				try {
+					return FileUtils.readFileToByteArray(resource.getDatafile());
+				} catch (IOException e) {
+					throw new UnexpectedResourceError(
+							"Unable to read resource datafile: " + resource.getDatafile().getAbsolutePath());
+				}
+			}
 		}
 		throw new UnexpectedResourceError(
 				"Resource not in transaction: " + dir.getLocation().getAbsolutePath());
 	}
 	
-	byte[] getCommittedData(DigestableResource resource) {
+	public byte[] getCommittedData(TxDigestableResource resource) {
 		if (committed) {
 			return getTransactionData(resource);
 		}
@@ -84,10 +96,15 @@ public class ResourceTransaction implements Transaction {
 					return FileUtils.readFileToByteArray(txItem.backupFile);
 				} catch (IOException e) {
 					throw new UnexpectedResourceError(
-							"Unable to read backup file: " + dir.getLocation().getAbsolutePath());
+							"Unable to read backup file: " + txItem.backupFile.getAbsolutePath());
 				}
 			}
-			return resource.getData();
+			try {
+				return FileUtils.readFileToByteArray(resource.getDatafile());
+			} catch (IOException e) {
+				throw new UnexpectedResourceError(
+						"Unable to read resource datafile: " + resource.getDatafile().getAbsolutePath());
+			}
 		}
 		throw new UnexpectedResourceError(
 				"Resource not in transaction: " + dir.getLocation().getAbsolutePath());
@@ -96,7 +113,7 @@ public class ResourceTransaction implements Transaction {
 	void prepareCommit() throws PreCommitException {
 		File backupFile = null;
 		try {
-			for(Map.Entry<DigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
+			for(Map.Entry<TxDigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
 				entry.getKey().lock();
 				backupFile = entry.getValue().backupFile;
 				FileUtils.copyFile(entry.getKey().getDatafile(), backupFile);
@@ -110,7 +127,7 @@ public class ResourceTransaction implements Transaction {
 	
 	void doCommit() {
 		try {
-			for(Map.Entry<DigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
+			for(Map.Entry<TxDigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
 				java.nio.file.Files.move(
 						entry.getValue().txResource.getDatafile().toPath(), 
 						entry.getKey().getDatafile().toPath(),
@@ -123,7 +140,7 @@ public class ResourceTransaction implements Transaction {
 	}
 	
 	void postCommit() {
-		for(Map.Entry<DigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
+		for(Map.Entry<TxDigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
 			if (entry.getValue().backupFile.exists()) 
 				entry.getValue().backupFile.delete();
 			entry.getKey().unlock();
@@ -140,7 +157,7 @@ public class ResourceTransaction implements Transaction {
 
 	void doRollback() {
 		try {
-			for(Map.Entry<DigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
+			for(Map.Entry<TxDigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
 				if (entry.getValue().backupFile.exists()) 
 					java.nio.file.Files.move(
 							entry.getValue().backupFile.toPath(),
@@ -162,6 +179,7 @@ public class ResourceTransaction implements Transaction {
 	
 	void release() {
 		dir.clean();
+		resourcesMap.keySet().stream().forEach((txResource) -> txResource.release());
 		manager.releaseTransaction(this);
 	}
 
