@@ -33,7 +33,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import lombok.Getter;
 
-public abstract class ManagedEntityResource<K,E> implements Resource<K,E> {
+public class ManagedEntityResource<K,E> implements Resource<K,E> {
 	
 	private final TxDigestableLocation resource;
 	private final Class<K> keyType;
@@ -60,6 +60,7 @@ public abstract class ManagedEntityResource<K,E> implements Resource<K,E> {
 			this.entitySerialization = (EntitySerialization<K,E>) new DefaultEntitySerializationFactory(keyType, entityType, metaData)
 				.create(keyType, entityType);
 		}
+		this.resource.getResourceManager().resources.put(entityType, this);
 	}
 
 	public ManagedEntityResource(
@@ -76,6 +77,7 @@ public abstract class ManagedEntityResource<K,E> implements Resource<K,E> {
 			this.entitySerialization = (EntitySerialization<K,E>) new DefaultEntitySerializationFactory<K,E>(keyType, entityType, metaData)
 				.create(keyType, entityType);
 		}
+		this.resource.getResourceManager().resources.put(entityType, this);
 	}
 
 	public ManagedEntityResource(
@@ -88,10 +90,13 @@ public abstract class ManagedEntityResource<K,E> implements Resource<K,E> {
 		this.entityType = entityType;
 		this.keyType = keyType;
 		this.entitySerialization = (EntitySerialization<K,E>) serializationFactory.create(keyType, entityType);
-		this.resource = resource;		
+		this.resource = resource;
+		this.resource.getResourceManager().resources.put(entityType, this);
 	}
 	
-	protected abstract ResourceSession getSession();
+	protected ResourceSession getSession() {
+		return resource.getResourceManager().getSession();
+	}
 
 	@Override
 	public E create(K key, E obj) throws DuplicateKeyError, MutatingEntityError {
@@ -109,6 +114,10 @@ public abstract class ManagedEntityResource<K,E> implements Resource<K,E> {
 		}
 		sess.put(entityType, key, obj, objResource.getChecksum());
 		return obj;
+	}
+	
+	public Object createAnonymous(Object key, Object obj) throws DuplicateKeyError, MutatingEntityError {
+		return create((K)key, (E)obj);
 	}
 
 	@Override
@@ -138,6 +147,10 @@ public abstract class ManagedEntityResource<K,E> implements Resource<K,E> {
 			return obj;
 		}
 		throw new MutatingEntityError("Unable to update an object which has already been updated elsewhere");
+	}
+	
+	public Object updateAnonymous(Object key, Object obj) throws MissingKeyError, MutatingEntityError, EntityLockedError {
+		return update((K)key, (E)obj);
 	}
 
 	@Override
@@ -184,6 +197,10 @@ public abstract class ManagedEntityResource<K,E> implements Resource<K,E> {
 			sess.delete(entityType, key);
 		}
 		return obj;
+	}
+	
+	public Object removeAnonymous(Object key) throws MissingKeyError, MutatingEntityError {
+		return remove((K)key);
 	}
 
 	@Override

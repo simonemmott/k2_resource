@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.k2.resource.MetaResource;
+import org.k2.resource.entity.EntityResourceManager;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.ResourceConfigurationException;
@@ -47,15 +48,15 @@ public interface DigestableLocation {
 	
 	static TxDigestableLocation create(
 			File location, 
-			ResourceTransactionManager txManager) throws ResourceConfigurationException {
-		return DigestableLocation.create(location, defaultDigestor(), txManager);
+			EntityResourceManager resManager) throws ResourceConfigurationException {
+		return DigestableLocation.create(location, defaultDigestor(), resManager);
 	}
 
 	static TxDigestableLocation create(
 			File location, 
 			Digestor digestor, 
-			ResourceTransactionManager txManager) throws ResourceConfigurationException {
-		return new TxDigestableLocation(location, digestor, txManager);
+			EntityResourceManager resManager) throws ResourceConfigurationException {
+		return new TxDigestableLocation(location, digestor, resManager);
 	}
 	
 	String getName();

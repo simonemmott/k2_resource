@@ -3,10 +3,11 @@ package org.k2.resource.entity;
 import java.util.List;
 import java.util.Set;
 
+import org.k2.resource.Session;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
 
-public interface ResourceSession {
+public interface ResourceSession extends Session {
 
 	<E> E get(Class<E> entityType, Object key);
 

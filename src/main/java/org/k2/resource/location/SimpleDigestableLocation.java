@@ -32,14 +32,25 @@ public class SimpleDigestableLocation implements DigestableLocation {
 	private final ObjectMapper metaMapper = new ObjectMapper(new YAMLFactory());
 	private boolean digested = false;
 	
-
-	public SimpleDigestableLocation(File location, Digestor digestor) throws ResourceConfigurationException {
+	private static void checkLocation(File location) throws ResourceConfigurationException {
 		if (! location.exists()) throw new ResourceConfigurationException(location, "does not exist!");
 		if (! location.isDirectory()) throw new ResourceConfigurationException(location, "is not a directory!");
 		if (! location.canRead()) throw new ResourceConfigurationException(location, "cannot be read!");
-		if (! location.canWrite()) throw new ResourceConfigurationException(location, "cannot be written!");	
+		if (! location.canWrite()) throw new ResourceConfigurationException(location, "cannot be written!");			
+	}
+	
+
+	public SimpleDigestableLocation(File location, Digestor digestor) throws ResourceConfigurationException {
+		checkLocation(location);
 		this.location = location;
 		this.digestor = digestor;
+		this.metadataFile = FileUtils.getFile(location, "__meta__.yml");
+	}
+	
+	public SimpleDigestableLocation(File location) throws ResourceConfigurationException {
+		checkLocation(location);
+		this.location = location;
+		this.digestor = DigestableLocation.defaultDigestor();
 		this.metadataFile = FileUtils.getFile(location, "__meta__.yml");
 	}
 	

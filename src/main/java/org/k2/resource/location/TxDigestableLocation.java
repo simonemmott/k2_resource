@@ -9,20 +9,30 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.k2.resource.MetaResource;
+import org.k2.resource.entity.EntityResourceManager;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.ResourceConfigurationException;
 import org.k2.resource.exception.UnexpectedResourceError;
 import org.k2.resource.transaction.ResourceTransactionManager;
+import org.k2.resource.transaction.TransactionManager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import static org.apache.commons.io.filefilter.FileFilterUtils.*;
 
 public class TxDigestableLocation implements DigestableLocation {
+	
+	private static void checkLocation(File location) throws ResourceConfigurationException {
+		if (! location.exists()) throw new ResourceConfigurationException(location, "does not exist!");
+		if (! location.isDirectory()) throw new ResourceConfigurationException(location, "is not a directory!");
+		if (! location.canRead()) throw new ResourceConfigurationException(location, "cannot be read!");
+		if (! location.canWrite()) throw new ResourceConfigurationException(location, "cannot be written!");	
+	}
 	
 	@Getter
 	private final File location;
@@ -32,20 +42,29 @@ public class TxDigestableLocation implements DigestableLocation {
 	private final File metadataFile;
 	private final ObjectMapper metaMapper = new ObjectMapper(new YAMLFactory());
 	private boolean digested = false;
-	private final ResourceTransactionManager txManager;
+	@Getter
+	@Setter
+	private EntityResourceManager resourceManager;
 	
 
 	public TxDigestableLocation(
 			File location, 
 			Digestor digestor,
-			ResourceTransactionManager txManager) throws ResourceConfigurationException {
-		if (! location.exists()) throw new ResourceConfigurationException(location, "does not exist!");
-		if (! location.isDirectory()) throw new ResourceConfigurationException(location, "is not a directory!");
-		if (! location.canRead()) throw new ResourceConfigurationException(location, "cannot be read!");
-		if (! location.canWrite()) throw new ResourceConfigurationException(location, "cannot be written!");	
+			EntityResourceManager resourceManager) throws ResourceConfigurationException {
+		checkLocation(location);
 		this.location = location;
 		this.digestor = digestor;
-		this.txManager = txManager;
+		this.resourceManager = resourceManager;
+		this.metadataFile = FileUtils.getFile(location, "__meta__.yml");
+	}
+	
+	public TxDigestableLocation(
+			File location, 
+			Digestor digestor) throws ResourceConfigurationException {
+		checkLocation(location);
+		this.location = location;
+		this.digestor = digestor;
+		this.resourceManager = null;
 		this.metadataFile = FileUtils.getFile(location, "__meta__.yml");
 	}
 	
@@ -69,15 +88,15 @@ public class TxDigestableLocation implements DigestableLocation {
 				location,
 				notFileFilter(nameFileFilter("__meta__.yml")), 
 				falseFileFilter())) {
-			TxDigestableResource resource = DigestableResource.create(file, digestor, txManager);
+			TxDigestableResource resource = DigestableResource.create(file, digestor, resourceManager.getTransactionManager());
 			resources.put(resource.getKey(), resource);
 		}
 		for (File file : FileUtils.listFilesAndDirs(
 				location,
 				falseFileFilter(), 
-				trueFileFilter())) {
+				notFileFilter(nameFileFilter(TransactionManager.TRANSACTIONS_DIR_NAME)))) {
 			if (!file.equals(location)) {
-				TxDigestableLocation location = DigestableLocation.create(file, digestor, txManager);
+				TxDigestableLocation location = DigestableLocation.create(file, digestor, resourceManager);
 				locations.put(location.getName(), location);
 			}
 		}
@@ -135,7 +154,7 @@ public class TxDigestableLocation implements DigestableLocation {
 		File newResourceFile = FileUtils.getFile(location, key+"."+getDatafileExtension());
 		try {
 			newResourceFile.createNewFile();
-			TxDigestableResource resource = DigestableResource.create(newResourceFile, digestor, txManager);
+			TxDigestableResource resource = DigestableResource.create(newResourceFile, digestor, resourceManager.getTransactionManager());
 			resources.put(resource.getKey(), resource);
 			return resource;
 		} catch (IOException e) {
@@ -182,7 +201,7 @@ public class TxDigestableLocation implements DigestableLocation {
 		File childLocationDir = FileUtils.getFile(location, name);
 		try {
 			FileUtils.forceMkdir(childLocationDir);
-			TxDigestableLocation childLocation = DigestableLocation.create(childLocationDir, digestor, txManager);
+			TxDigestableLocation childLocation = DigestableLocation.create(childLocationDir, digestor, resourceManager);
 			locations.put(childLocation.getName(), childLocation);
 			return childLocation;
 		} catch (IOException e) {

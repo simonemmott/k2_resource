@@ -17,6 +17,8 @@ import org.k2.resource.binary.BinaryResource;
 import org.k2.resource.entity.exception.UnexpectedSerializationError;
 import org.k2.resource.entity.serialize.EntitySerializationFactory;
 import org.k2.resource.entity.serialize.EntitySerializer;
+import org.k2.resource.exception.DuplicateKeyError;
+import org.k2.resource.exception.EntityLockedError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
 import org.k2.resource.exception.UnexpectedResourceError;
@@ -32,52 +34,27 @@ public class SimpleEntityCache implements EntityCache {
 		public E clone = null;
 		public boolean deleted = false;
 		public String checksum = NEW_ENTITY;
+		
+		public boolean isNew() {
+			return checksum.equals(NEW_ENTITY);
+		}
+		public boolean isChanged() {
+			if (clone == null) return true;
+			if (deleted) return true;
+			return !clone.equals(entity);
+			
+		}
+		public boolean isDeleted() {
+			return deleted;
+		}
 	}
 	
-//	@Getter
-//	private final ThreadLocal<MessageDigest> digest;
-//	private final Map<Class<?>, EntitySerializer<?>> serializers;
 	private final Map<Class<?>,Map<Object,CacheItem<?>>> cache;
 
 	public SimpleEntityCache() {
-//		this.digest = ThreadLocal.withInitial(() -> {
-//			try {
-//				return MessageDigest.getInstance("MD5");
-//			} catch (NoSuchAlgorithmException e) {
-//				throw new UnexpectedResourceError("Unable to create MD5 digest");
-//			}
-//		});
-//		this.serializers = new HashMap<>();
 		this.cache = new HashMap<>();
 	}
 
-//	public SimpleEntityCache(
-//			ThreadLocal<MessageDigest> digest) {
-//		this.digest = digest;
-//		this.serializers = new HashMap<>();
-//		this.cache = new HashMap<>();
-//	}
-
-//	public SimpleEntityCache(
-//			ThreadLocal<MessageDigest> digest, 
-//			Map<Class<?>, EntitySerializer<?>> serializers) {
-//		this.digest = digest;
-//		this.serializers = serializers;
-//		this.cache = new HashMap<>();
-//	}
-	
-//	public <E> SimpleEntityCache serialize(Class<E> type, EntitySerializer<E> serializer) {
-//		serializers.put(type, serializer);
-//		return this;
-//		
-//	}
-	
-//	public <E> EntitySerializer<E> getEntitySerializer(Class<E> type) {
-//		EntitySerializer<E> serializer = (EntitySerializer<E>) serializers.get(type);
-//		if (serializer == null) throw new UnexpectedSerializationError(type);
-//		return serializer;
-//	}
-	
 	private <E> Map<Object,CacheItem<?>> getCacheItems(Class<E> type) {
 		if (!cache.containsKey(type)) {
 			cache.put(type, new HashMap<>());
@@ -149,23 +126,21 @@ public class SimpleEntityCache implements EntityCache {
 	public <E> boolean isNew(Class<E> type, Object key) throws MissingKeyError {
 		CacheItem<E> cacheItem = getCacheItem(type, key);
 		if (cacheItem == null) throw missingKeyError(type, key);
-		return cacheItem.checksum.equals(NEW_ENTITY);
+		return cacheItem.isNew();
 	}
 
 	@Override
 	public <E> boolean isDeleted(Class<E> type, Object key) throws MissingKeyError {
 		CacheItem<E> cacheItem = getCacheItem(type, key);
 		if (cacheItem == null) throw missingKeyError(type, key);
-		return cacheItem.deleted;
+		return cacheItem.isDeleted();
 	}
 
 	@Override
 	public <E> boolean isChanged(Class<E> type, Object key) throws MissingKeyError {
 		CacheItem<E> cacheItem = getCacheItem(type, key);
 		if (cacheItem == null) throw missingKeyError(type, key);
-		if (cacheItem.clone == null) return true;
-		if (cacheItem.deleted) return true;
-		return !cacheItem.clone.equals(cacheItem.entity);
+		return cacheItem.isChanged();
 	}
 
 	@Override
@@ -205,4 +180,24 @@ public class SimpleEntityCache implements EntityCache {
 				.collect(Collectors.toSet());
 	}
 
+	@Override
+	public void forEach(CacheItemConsumer consumer) throws 
+			MissingKeyError, 
+			MutatingEntityError, 
+			DuplicateKeyError, 
+			EntityLockedError {
+		for (Map.Entry<Class<?>,Map<Object,CacheItem<?>>> entityEntry : cache.entrySet()) {
+			for (Map.Entry<Object,CacheItem<?>> keyedEntry : entityEntry.getValue().entrySet()) {
+				Object key = keyedEntry.getKey();
+				Class<?> keyType = key.getClass();
+				Class<?> entityType = entityEntry.getKey();
+				Object entity = keyedEntry.getValue().entity;
+				boolean isNew = keyedEntry.getValue().isNew();
+				boolean isChanged = keyedEntry.getValue().isChanged();
+				boolean isDeleted = keyedEntry.getValue().isDeleted();
+				consumer.accept(keyType, key, entityType, entity, isNew, isChanged, isDeleted);
+			}
+		}
+		
+	}
 }

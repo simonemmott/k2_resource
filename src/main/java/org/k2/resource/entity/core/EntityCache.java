@@ -3,10 +3,27 @@ package org.k2.resource.entity.core;
 import java.util.Set;
 
 import org.k2.resource.entity.core.SimpleEntityCache.CacheItem;
+import org.k2.resource.exception.DuplicateKeyError;
+import org.k2.resource.exception.EntityLockedError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
 
 public interface EntityCache {
+	
+	public interface CacheItemConsumer {
+		void accept(
+				Class<?> keyType, 
+				Object key, 
+				Class<?> entityType, 
+				Object entity, 
+				boolean isNew, 
+				boolean isChanged, 
+				boolean isDeleted) throws 
+		MissingKeyError, 
+		MutatingEntityError, 
+		DuplicateKeyError,
+		EntityLockedError;
+	}
 	
 	public final String NEW_ENTITY = "NEW_ENTITY";
 	
@@ -22,5 +39,10 @@ public interface EntityCache {
 	<E> Set<E> fetch(Class<E> entityType);
 	<E> Set<Object> keys(Class<E> type);
 	<K,E> Set<K> keys(Class<E> type, Class<K> keyType);
+	void forEach(CacheItemConsumer consumer) throws 
+			MissingKeyError, 
+			MutatingEntityError, 
+			DuplicateKeyError, 
+			EntityLockedError;
 
 }
