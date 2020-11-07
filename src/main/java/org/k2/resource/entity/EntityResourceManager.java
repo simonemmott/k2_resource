@@ -95,6 +95,7 @@ public class EntityResourceManager implements ResourceManager {
 		return new ManagedResourceSession(this);
 	}
 	
+	@Getter
 	private final TxDigestableLocation location;
 	private final ThreadLocal<ResourceSession> threadLocalSession = ThreadLocal.withInitial(() -> createSession());
 	@Getter

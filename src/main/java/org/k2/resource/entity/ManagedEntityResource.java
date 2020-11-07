@@ -16,9 +16,11 @@ import org.k2.resource.binary.BinaryEntityImpl;
 import org.k2.resource.binary.BinaryResource;
 import org.k2.resource.binary.exception.BinaryResourceInitializeException;
 import org.k2.resource.entity.exception.EntityConfigurationException;
+import org.k2.resource.entity.exception.ManagedResourceInitializationError;
 import org.k2.resource.entity.serialize.DefaultEntitySerializationFactory;
 import org.k2.resource.entity.serialize.EntitySerialization;
 import org.k2.resource.entity.serialize.EntitySerializationFactory;
+import org.k2.resource.entity.util.RefItemUtils;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.EntityLockedError;
 import org.k2.resource.exception.MissingKeyError;
@@ -36,64 +38,71 @@ import lombok.Getter;
 public class ManagedEntityResource<K,E> implements Resource<K,E> {
 	
 	private final TxDigestableLocation resource;
+	private final EntityResourceManager resourceManager;
 	private final Class<K> keyType;
 	private final Class<E> entityType;
 	private EntitySerialization<K,E> entitySerialization;
 	
-	private final ObjectMapper defaultMetaMapper() {
-		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(MetaResource.class, new MetaEntityResourceDeserializer());
-		mapper.registerModule(module);
-		return mapper;
-	}
-
 	public ManagedEntityResource(
 			Class<K> keyType, 
 			Class<E> entityType,
-			TxDigestableLocation resource) throws BinaryResourceInitializeException, EntityConfigurationException {
+			EntityResourceManager resourceManager) throws ManagedResourceInitializationError, EntityConfigurationException {
 		this.entityType = entityType;
 		this.keyType = keyType;
-		this.resource = resource;
+		this.resourceManager = resourceManager;
+		this.resource = getResource(resourceManager, createMetaData(keyType, entityType));
 		if (this.resource.hasMetadata()) {
 			MetaEntityResource metaData = this.resource.getMetadata(MetaEntityResource.class);
 			this.entitySerialization = (EntitySerialization<K,E>) new DefaultEntitySerializationFactory(keyType, entityType, metaData)
 				.create(keyType, entityType);
 		}
-		this.resource.getResourceManager().resources.put(entityType, this);
+		resourceManager.resources.put(entityType, this);
 	}
-
+	
 	public ManagedEntityResource(
 			Class<K> keyType, 
 			Class<E> entityType,
-			TxDigestableLocation resource, 
-			ThreadLocal<MessageDigest> digest) throws BinaryResourceInitializeException, EntityConfigurationException {
-		
-		this.entityType = entityType;
-		this.keyType = keyType;
-		this.resource = resource;
-		if (this.resource.hasMetadata()) {
-			MetaEntityResource metaData = this.resource.getMetadata(MetaEntityResource.class);
-			this.entitySerialization = (EntitySerialization<K,E>) new DefaultEntitySerializationFactory<K,E>(keyType, entityType, metaData)
-				.create(keyType, entityType);
-		}
-		this.resource.getResourceManager().resources.put(entityType, this);
-	}
-
-	public ManagedEntityResource(
-			Class<K> keyType, 
-			Class<E> entityType,
-			TxDigestableLocation resource, 
-			ThreadLocal<MessageDigest> digest,
-			EntitySerializationFactory<K,E> serializationFactory) throws BinaryResourceInitializeException {
+			EntityResourceManager resourceManager, 
+			EntitySerializationFactory<K,E> serializationFactory) throws EntityConfigurationException, ManagedResourceInitializationError {
 		
 		this.entityType = entityType;
 		this.keyType = keyType;
 		this.entitySerialization = (EntitySerialization<K,E>) serializationFactory.create(keyType, entityType);
-		this.resource = resource;
-		this.resource.getResourceManager().resources.put(entityType, this);
+		this.resourceManager = resourceManager;
+		this.resource = getResource(resourceManager, createMetaData(keyType, entityType));
+		resourceManager.resources.put(entityType, this);
 	}
 	
+	private MetaEntityResource createMetaData(Class<K> keyType, Class<E> entityType) throws EntityConfigurationException {
+		String typeReference = RefItemUtils.getTypeReference(entityType);
+		MetaEntityResource metadata = new MetaEntityResource();
+		metadata.setEntityName(typeReference);
+		metadata.setEntityType(entityType);
+		metadata.setKeyType(keyType);
+		metadata.setPrettyPrint(true);
+		metadata.setDatafileExtension("json");
+		return metadata;
+	}
+	
+	private TxDigestableLocation getResource(
+			EntityResourceManager resourceManager, 
+			MetaEntityResource metadata) throws ManagedResourceInitializationError {
+		if (resourceManager.getLocation().locationExists(metadata.getEntityName())) {
+			try {
+				return resourceManager.getLocation().getLocation(metadata.getEntityName());
+			} catch (MissingKeyError e) {
+				throw new ManagedResourceInitializationError("Unable to open resource location for: " + entityType.getName(), e);
+			}
+		} else {
+			try {
+				return resourceManager.getLocation().createLocation(metadata.getEntityName(), metadata);
+			} catch (DuplicateKeyError e) {
+				throw new ManagedResourceInitializationError("Unable to create resource location for: " + entityType.getName(), e);
+			}
+			
+		}		
+	}
+
 	protected ResourceSession getSession() {
 		return resource.getResourceManager().getSession();
 	}
