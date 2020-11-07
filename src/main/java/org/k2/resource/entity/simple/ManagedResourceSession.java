@@ -36,7 +36,8 @@ public class ManagedResourceSession extends SimpleResourceSession implements Res
 				Object entity, 
 				boolean isNew, 
 				boolean isChanged, 
-				boolean isDeleted) -> {
+				boolean isDeleted,
+				String checksum) -> {
 					ManagedEntityResource<?, ?> resource;
 					try {
 						resource = resourceManager.getResource(entityType);
@@ -45,7 +46,7 @@ public class ManagedResourceSession extends SimpleResourceSession implements Res
 						} else if (isDeleted) {
 							resource.removeFromSession(key);
 						} else if (isChanged) {
-							resource.updateFromSession(key, entity);
+							resource.updateFromSession(key, entity, checksum);
 						}
 					} catch (ManagedResourceError e) {
 						throw new UnexpectedResourceError(

@@ -18,7 +18,8 @@ public interface EntityCache {
 				Object entity, 
 				boolean isNew, 
 				boolean isChanged, 
-				boolean isDeleted) throws 
+				boolean isDeleted,
+				String checksum) throws 
 		MissingKeyError, 
 		MutatingEntityError, 
 		DuplicateKeyError,

@@ -195,7 +195,8 @@ public class SimpleEntityCache implements EntityCache {
 				boolean isNew = keyedEntry.getValue().isNew();
 				boolean isChanged = keyedEntry.getValue().isChanged();
 				boolean isDeleted = keyedEntry.getValue().isDeleted();
-				consumer.accept(keyType, key, entityType, entity, isNew, isChanged, isDeleted);
+				String checksum = keyedEntry.getValue().checksum;
+				consumer.accept(keyType, key, entityType, entity, isNew, isChanged, isDeleted, checksum);
 			}
 		}
 		

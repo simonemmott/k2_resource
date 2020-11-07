@@ -157,9 +157,7 @@ public class ManagedEntityResource<K,E> implements Resource<K,E> {
 		throw new MutatingEntityError("Unable to update an object which has already been updated elsewhere");
 	}
 	
-	public Object updateFromSession(Object key, Object obj) throws MissingKeyError, MutatingEntityError, EntityLockedError {
-		ResourceSession sess = getSession();
-		String checksum = sess.checksum(entityType, key);
+	public Object updateFromSession(Object key, Object obj, String checksum) throws MissingKeyError, MutatingEntityError, EntityLockedError {
 		String keyStr = entitySerialization.getKeySerializer().serialize((K)key);
 		TxDigestableResource objResource = resource.getResource(keyStr);
 		if (objResource.getChecksum().equals(checksum)) {
