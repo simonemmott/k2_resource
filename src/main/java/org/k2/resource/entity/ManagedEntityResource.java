@@ -116,8 +116,16 @@ public class ManagedEntityResource<K,E> implements Resource<K,E> {
 		return obj;
 	}
 	
-	public Object createAnonymous(Object key, Object obj) throws DuplicateKeyError, MutatingEntityError {
-		return create((K)key, (E)obj);
+	public Object createFromSession(Object key, Object obj) throws DuplicateKeyError, MutatingEntityError {
+		entitySerialization.getKeySetter().set((E)obj, (K)key);
+		String keyStr = entitySerialization.getKeySerializer().serialize((K)key);
+		TxDigestableResource objResource = resource.createResource(keyStr);
+		try {
+			objResource.setData(entitySerialization.getSerializer().serialize((E)obj));
+		} catch (EntityLockedError e) {
+			throw new MutatingEntityError(keyStr, "Unable to serialize new entity");
+		}
+		return obj;
 	}
 
 	@Override
@@ -149,8 +157,16 @@ public class ManagedEntityResource<K,E> implements Resource<K,E> {
 		throw new MutatingEntityError("Unable to update an object which has already been updated elsewhere");
 	}
 	
-	public Object updateAnonymous(Object key, Object obj) throws MissingKeyError, MutatingEntityError, EntityLockedError {
-		return update((K)key, (E)obj);
+	public Object updateFromSession(Object key, Object obj) throws MissingKeyError, MutatingEntityError, EntityLockedError {
+		ResourceSession sess = getSession();
+		String checksum = sess.checksum(entityType, key);
+		String keyStr = entitySerialization.getKeySerializer().serialize((K)key);
+		TxDigestableResource objResource = resource.getResource(keyStr);
+		if (objResource.getChecksum().equals(checksum)) {
+			objResource.setData(entitySerialization.getSerializer().serialize((E)obj));
+			return obj;
+		}
+		throw new MutatingEntityError("Unable to update an object which has already been updated elsewhere");
 	}
 
 	@Override
@@ -199,8 +215,9 @@ public class ManagedEntityResource<K,E> implements Resource<K,E> {
 		return obj;
 	}
 	
-	public Object removeAnonymous(Object key) throws MissingKeyError, MutatingEntityError {
-		return remove((K)key);
+	public Object removeFromSession(Object key) throws MissingKeyError, MutatingEntityError {
+		TxDigestableResource objResource = resource.removeResource(entitySerialization.getKeySerializer().serialize((K)key));
+		return entitySerialization.getDeserializer().deserialize(objResource.getData());
 	}
 
 	@Override

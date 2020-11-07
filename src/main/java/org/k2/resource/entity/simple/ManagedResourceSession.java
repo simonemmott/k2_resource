@@ -41,11 +41,11 @@ public class ManagedResourceSession extends SimpleResourceSession implements Res
 					try {
 						resource = resourceManager.getResource(entityType);
 						if (isNew) {
-							resource.createAnonymous(key, entity);
+							resource.createFromSession(key, entity);
 						} else if (isDeleted) {
-							resource.removeAnonymous(key);
+							resource.removeFromSession(key);
 						} else if (isChanged) {
-							resource.updateAnonymous(key, entity);
+							resource.updateFromSession(key, entity);
 						}
 					} catch (ManagedResourceError e) {
 						throw new UnexpectedResourceError(
