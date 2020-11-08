@@ -1,0 +1,6 @@
+---
+datafileExtension: "json"
+keyType: "java.lang.String"
+entityType: "org.k2.resource.entity.test.RefItem1"
+entityName: "RefItem1"
+prettyPrint: true
