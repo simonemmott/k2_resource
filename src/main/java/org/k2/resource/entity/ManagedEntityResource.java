@@ -28,6 +28,8 @@ import org.k2.resource.exception.MutatingEntityError;
 import org.k2.resource.exception.UnexpectedResourceError;
 import org.k2.resource.location.TxDigestableLocation;
 import org.k2.resource.location.TxDigestableResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -36,6 +38,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.Getter;
 
 public class ManagedEntityResource<K,E> implements Resource<K,E> {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ManagedEntityResource.class);
 	
 	private final TxDigestableLocation resource;
 	private final EntityResourceManager resourceManager;
@@ -109,6 +113,7 @@ public class ManagedEntityResource<K,E> implements Resource<K,E> {
 
 	@Override
 	public E create(K key, E obj) throws DuplicateKeyError, MutatingEntityError {
+		LOGGER.debug("create({}, {})", key, obj);
 		ResourceSession sess = getSession();
 		entitySerialization.getKeySetter().set(obj, key);
 		String keyStr = entitySerialization.getKeySerializer().serialize(key);

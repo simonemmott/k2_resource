@@ -15,6 +15,8 @@ import org.k2.resource.exception.EntityLockedError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
 import org.k2.resource.exception.UnexpectedResourceError;
+import org.k2.resource.transaction.ResourceTransaction;
+import org.k2.resource.transaction.ResourceTransactionManager;
 
 public class ManagedResourceSession extends SimpleResourceSession implements ResourceSession {
 	
@@ -58,8 +60,48 @@ public class ManagedResourceSession extends SimpleResourceSession implements Res
 	}
 
 	@Override
-	public <R> R doInTransaction(Supplier<R> expression) throws Throwable {
-		return expression.get();
+	public <R> R doInTransaction(ThrowableSupplier<R> expression) throws Throwable {
+		ResourceTransactionManager txManager = resourceManager.getTransactionManager();
+		if (txManager.hasTransaction()) {
+			return expression.get();
+		} else {
+			ResourceTransaction tx = txManager.getTransaction();
+			R rVal = null;
+			try {
+				rVal = expression.get();
+				save();
+			} catch (Throwable err) {
+				tx.rollback();
+				throw err;
+			}
+			tx.commit();
+			return rVal;
+		}
+	}
+	
+	@Override
+	public void doInTransaction(ThrowableRunable runnable) throws Throwable {
+		ResourceTransactionManager txManager = resourceManager.getTransactionManager();
+		if (txManager.hasTransaction()) {
+			runnable.run();
+			return;
+		} else {
+			ResourceTransaction tx = txManager.getTransaction();
+			try {
+				runnable.run();
+				save();
+			} catch (Throwable err) {
+				tx.rollback();
+				throw err;
+			}
+			tx.commit();
+			return;
+		}
+	}
+	
+	@Override
+	public ResourceTransaction getTransaction() {
+		return resourceManager.getTransactionManager().getTransaction();
 	}
 
 }

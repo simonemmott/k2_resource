@@ -50,8 +50,16 @@ public class EntityResourceManager implements ResourceManager {
 		if (!transactionsDir.isDirectory())
 			throw new ManagedResourceInitializationError(
 					"unable to create the transactions dir: " + transactionsDir.getAbsolutePath() + " - already exists but is not a directory");
-		
 		return open(resourceDir);
+	}
+	
+	private static void clearTransactions(File transactionsDir) throws ManagedResourceInitializationError {
+		try {
+			FileUtils.cleanDirectory(transactionsDir);
+		} catch (IOException e) {
+			throw new ManagedResourceInitializationError(
+					"unable to clear the transactions dir: " + transactionsDir.getAbsolutePath(), e);
+		}		
 	}
 	
 	public static EntityResourceManager open(File resourceDir) throws ManagedResourceInitializationError {
@@ -80,6 +88,7 @@ public class EntityResourceManager implements ResourceManager {
 		if (!transactionsDir.canWrite()) 
 			throw new ManagedResourceInitializationError(
 					"the transaction directory: " + transactionsDir.getAbsolutePath() + " is not writable");
+		clearTransactions(transactionsDir);
 		DigestableLocation.Digestor digestor = DigestableLocation.defaultDigestor();
 		ResourceTransactionManager txManager;
 		try {
@@ -107,6 +116,7 @@ public class EntityResourceManager implements ResourceManager {
 		this.location = location;
 		this.location.setResourceManager(this);
 		this.transactionManager = transactionManager;
+		this.transactionManager.setResourceManager(this);
 	}
 
 	@Override

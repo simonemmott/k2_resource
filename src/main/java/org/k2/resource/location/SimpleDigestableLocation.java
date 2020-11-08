@@ -74,7 +74,7 @@ public class SimpleDigestableLocation implements DigestableLocation {
 				location,
 				notFileFilter(nameFileFilter("__meta__.yml")), 
 				falseFileFilter())) {
-			DigestableResource resource = DigestableResource.create(file, digestor);
+			DigestableResource resource = DigestableResource.create(this, file, digestor);
 			resources.put(resource.getKey(), resource);
 		}
 		for (File file : FileUtils.listFilesAndDirs(
@@ -140,7 +140,7 @@ public class SimpleDigestableLocation implements DigestableLocation {
 		File newResourceFile = FileUtils.getFile(location, key+"."+getDatafileExtension());
 		try {
 			newResourceFile.createNewFile();
-			DigestableResource resource = DigestableResource.create(newResourceFile, digestor);
+			DigestableResource resource = DigestableResource.create(this, newResourceFile, digestor);
 			resources.put(resource.getKey(), resource);
 			return resource;
 		} catch (IOException e) {

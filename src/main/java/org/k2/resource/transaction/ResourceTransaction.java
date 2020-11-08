@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.EntityLockedError;
+import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.UnexpectedResourceError;
 import org.k2.resource.location.DigestableLocation;
 import org.k2.resource.location.DigestableResource;
@@ -27,6 +28,7 @@ public class ResourceTransaction implements Transaction {
 	private final DigestableLocation dir;
 	private final ResourceTransactionManager manager;
 	private final Map<TxDigestableResource, TransactionItem> resourcesMap = new HashMap<>();
+	private boolean inCommit = false;
 	private boolean committed = false;
 
 	public ResourceTransaction(ResourceTransactionManager manager, DigestableLocation dir) {
@@ -116,7 +118,11 @@ public class ResourceTransaction implements Transaction {
 			for(Map.Entry<TxDigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
 				entry.getKey().lock();
 				backupFile = entry.getValue().backupFile;
-				FileUtils.copyFile(entry.getKey().getDatafile(), backupFile);
+				if (entry.getKey().getDatafile().exists()) {
+					FileUtils.copyFile(entry.getKey().getDatafile(), backupFile);
+				} else {
+					backupFile.createNewFile();
+				}
 			}
 		} catch (IOException err) {
 			backupFile.delete();
@@ -149,22 +155,40 @@ public class ResourceTransaction implements Transaction {
 
 	@Override
 	public void commit() throws PreCommitException {
+		inCommit = true;
+		try {
 		prepareCommit();
 		doCommit();
 		postCommit();
 		release();
+		} finally {
+			inCommit = false;
+		}
 	}
 
 	void doRollback() {
 		try {
 			for(Map.Entry<TxDigestableResource, TransactionItem> entry : resourcesMap.entrySet()) {
-				if (entry.getValue().backupFile.exists()) 
-					java.nio.file.Files.move(
-							entry.getValue().backupFile.toPath(),
-							entry.getKey().getDatafile().toPath(),
-							StandardCopyOption.ATOMIC_MOVE);
-					entry.getValue().backupFile.delete();
-				entry.getKey().unlock();
+				if (inCommit) {
+					if (entry.getValue().backupFile.exists()) 
+						if (entry.getValue().backupFile.length() == 0) {
+							FileUtils.forceDelete(entry.getKey().getDatafile());
+						} else {
+							java.nio.file.Files.move(
+									entry.getValue().backupFile.toPath(),
+									entry.getKey().getDatafile().toPath(),
+									StandardCopyOption.ATOMIC_MOVE);
+						}
+						entry.getValue().backupFile.delete();
+					entry.getKey().unlock();
+				}
+				if (!entry.getKey().getDatafile().exists()) {
+					try {
+						entry.getKey().getLocation().removeResource(entry.getKey().getKey());
+					} catch (MissingKeyError e) {
+						throw new RollbackException(e);
+					}
+				}
 			}
 		} catch (IOException err) {
 			throw new RollbackException(err);

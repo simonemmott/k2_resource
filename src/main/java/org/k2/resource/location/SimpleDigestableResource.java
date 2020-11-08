@@ -13,9 +13,13 @@ import org.k2.resource.exception.UnexpectedResourceError;
 import org.k2.resource.location.DigestableLocation.Digestor;
 import org.k2.util.binary.BinaryUtils;
 
+import lombok.Getter;
+
 public class SimpleDigestableResource implements DigestableResource {
 
-	private final File location;
+	@Getter
+	private final DigestableLocation location;
+	private final File datafile;
 	protected final Digestor digestor;
 	protected byte[] digest;
 	protected String checksum;
@@ -24,29 +28,26 @@ public class SimpleDigestableResource implements DigestableResource {
 	private Lock writeLock = lock.writeLock();
 	private Lock readLock = lock.readLock();
 
-	public SimpleDigestableResource(File location, Digestor digestor) throws ResourceConfigurationException {
-		if (! location.exists()) throw new ResourceConfigurationException(location, "does not exist!");
-		if (! location.isFile()) throw new ResourceConfigurationException(location, "is not a file!");
-		if (! location.canRead()) throw new ResourceConfigurationException(location, "cannot be read!");
-		if (! location.canWrite()) throw new ResourceConfigurationException(location, "cannot be written!");	
+	public SimpleDigestableResource(DigestableLocation location, File datafile, Digestor digestor) throws ResourceConfigurationException {
 		this.location = location;
+		this.datafile = datafile;
 		this.digestor = digestor;
 	}
 
 	@Override
 	public String getKey() {
-		return location.getName().split("\\.(?=[^\\.]+$)")[0];
+		return datafile.getName().split("\\.(?=[^\\.]+$)")[0];
 	}
 
 	@Override
 	public byte[] getData() {
 		try {
 			readLock.lock();
-			byte[] data = FileUtils.readFileToByteArray(location);
+			byte[] data = FileUtils.readFileToByteArray(datafile);
 			digest(data);
 			return data;
 		} catch (IOException e) {
-			throw new UnexpectedResourceError("Unable to read from datafile: "+location.getAbsolutePath(), e);
+			throw new UnexpectedResourceError("Unable to read from datafile: "+datafile.getAbsolutePath(), e);
 		} finally {
 			readLock.unlock();
 		}
@@ -56,10 +57,12 @@ public class SimpleDigestableResource implements DigestableResource {
 	public void setData(byte[] data) throws EntityLockedError {
 		try {
 			writeLock.lock();
-			FileUtils.writeByteArrayToFile(location, data);
+			if (!datafile.exists())
+				datafile.createNewFile();
+			FileUtils.writeByteArrayToFile(datafile, data);
 			digest(data);
 		} catch (IOException e) {
-			throw new UnexpectedResourceError("Unable to write to datafile: "+location.getAbsolutePath(), e);
+			throw new UnexpectedResourceError("Unable to write to datafile: "+datafile.getAbsolutePath(), e);
 		} finally {
 			writeLock.unlock();
 		}
@@ -87,7 +90,7 @@ public class SimpleDigestableResource implements DigestableResource {
 
 	@Override
 	public File getDatafile() {
-		return location;
+		return datafile;
 	}
 
 	@Override

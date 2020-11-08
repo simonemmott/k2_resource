@@ -21,10 +21,11 @@ public class TxDigestableResource extends SimpleDigestableResource {
 	protected boolean txDigested = false;
 
 	public TxDigestableResource(
-			File location, 
+			TxDigestableLocation location,
+			File datafile, 
 			Digestor digestor, 
 			ResourceTransactionManager txManager) throws ResourceConfigurationException {
-		super(location, digestor);
+		super(location, datafile, digestor);
 		this.txManager = txManager;
 	}
 	
@@ -71,7 +72,7 @@ public class TxDigestableResource extends SimpleDigestableResource {
 			super.digest(data);
 		} else {
 			txDigest = digestor.digest(data);
-			txChecksum = BinaryUtils.hex(digest);
+			txChecksum = BinaryUtils.hex(txDigest);
 			txDigested = true;
 		}
 	}

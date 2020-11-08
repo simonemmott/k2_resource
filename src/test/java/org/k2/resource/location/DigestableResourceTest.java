@@ -28,7 +28,7 @@ class DigestableResourceTest {
 	@Test
 	void testGetKey() throws Exception {
 		File rFile = new File("testFilesystem/DigestableResourceTest/key_1.json");
-		DigestableResource r = DigestableResource.create(rFile);
+		DigestableResource r = DigestableResource.create(null, rFile);
 		assertThat(r).isNotNull();
 		assertThat(r.getKey()).isEqualTo("key_1");
 	}
@@ -36,7 +36,7 @@ class DigestableResourceTest {
 	@Test
 	void testGetData() throws Exception {
 		File rFile = new File("testFilesystem/DigestableResourceTest/key_1.json");
-		DigestableResource r = DigestableResource.create(rFile);
+		DigestableResource r = DigestableResource.create(null, rFile);
 
 		assertThat(r.getData()).isEqualTo(FileUtils.readFileToByteArray(rFile));
 	}
@@ -44,7 +44,7 @@ class DigestableResourceTest {
 	@Test
 	void testSetData() throws Exception {
 		File rFile = new File("testFilesystem/DigestableResourceTest/key_2.json");
-		DigestableResource r = DigestableResource.create(rFile);
+		DigestableResource r = DigestableResource.create(null, rFile);
 		byte[] data = new byte[10];
 	    new Random().nextBytes(data);
 
@@ -63,7 +63,7 @@ class DigestableResourceTest {
 	@Test
 	void testGetDigest() throws Exception {
 		File rFile = new File("testFilesystem/DigestableResourceTest/key_1.json");
-		DigestableResource r = DigestableResource.create(rFile);
+		DigestableResource r = DigestableResource.create(null, rFile);
 		byte[] expectedDigest = DigestableLocation.defaultDigestor().digest(FileUtils.readFileToByteArray(rFile));
 
 		assertThat(r.getDigest()).isEqualTo(expectedDigest);
@@ -73,7 +73,7 @@ class DigestableResourceTest {
 	@Test
 	void testGetChecksum() throws Exception {
 		File rFile = new File("testFilesystem/DigestableResourceTest/key_1.json");
-		DigestableResource r = DigestableResource.create(rFile);
+		DigestableResource r = DigestableResource.create(null, rFile);
 		byte[] expectedDigest = DigestableLocation.defaultDigestor().digest(FileUtils.readFileToByteArray(rFile));
 		String expectedChecksum = BinaryUtils.hex(expectedDigest);
 		assertThat(r.getChecksum()).isEqualTo(expectedChecksum);
@@ -82,7 +82,7 @@ class DigestableResourceTest {
 	@Test
 	void testGetDatafile() throws Exception {
 		File rFile = new File("testFilesystem/DigestableResourceTest/key_1.json");
-		DigestableResource r = DigestableResource.create(rFile);
+		DigestableResource r = DigestableResource.create(null, rFile);
 		assertThat(r.getDatafile()).isEqualTo(rFile);
 	}
 	

@@ -3,6 +3,7 @@ package org.k2.resource.entity.simple;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.k2.resource.Session;
 import org.k2.resource.entity.ResourceSession;
 import org.k2.resource.entity.core.EntityCache;
 import org.k2.resource.entity.core.SimpleEntityCache;
@@ -10,6 +11,10 @@ import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.EntityLockedError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
+import org.k2.resource.exception.UnexpectedResourceError;
+import org.k2.resource.transaction.ResourceTransaction;
+import org.k2.resource.transaction.Transaction;
+import org.k2.resource.transaction.exception.PreCommitException;
 
 public class SimpleResourceSession implements ResourceSession {
 	
@@ -77,8 +82,24 @@ public class SimpleResourceSession implements ResourceSession {
 	}
 
 	@Override
-	public <R> R doInTransaction(Supplier<R> expression) throws Throwable {
+	public <R> R doInTransaction(ThrowableSupplier<R> expression) throws Throwable {
 		return expression.get();
+	}
+
+	@Override
+	public ResourceTransaction getTransaction() {
+		throw new UnexpectedResourceError("NOT_IMPLEMENTED");
+	}
+
+	@Override
+	public void clear() {
+		cache.clear();
+		
+	}
+
+	@Override
+	public void doInTransaction(ThrowableRunable runnable) throws Throwable {
+		runnable.run();
 	}
 
 }

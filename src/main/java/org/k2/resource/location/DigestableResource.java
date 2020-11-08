@@ -11,27 +11,31 @@ import org.k2.resource.transaction.TransactionManager;
 public interface DigestableResource {
 
 	static DigestableResource create(
-			File location) throws ResourceConfigurationException {
-		return DigestableResource.create(location, DigestableLocation.defaultDigestor());
+			DigestableLocation location,
+			File datafile) throws ResourceConfigurationException {
+		return DigestableResource.create(location, datafile, DigestableLocation.defaultDigestor());
 	}
 
 	static DigestableResource create(
-			File location, 
+			DigestableLocation location,
+			File datafile, 
 			DigestableLocation.Digestor digestor) throws ResourceConfigurationException {
-		return new SimpleDigestableResource(location, digestor);
+		return new SimpleDigestableResource(location, datafile, digestor);
 	}
 	
 	static TxDigestableResource create(
-			File location, 
+			TxDigestableLocation location,
+			File datafile, 
 			ResourceTransactionManager txManager) throws ResourceConfigurationException {
-		return DigestableResource.create(location, DigestableLocation.defaultDigestor(), txManager);
+		return DigestableResource.create(location, datafile, DigestableLocation.defaultDigestor(), txManager);
 	}
 
 	static TxDigestableResource create(
-			File location, 
+			TxDigestableLocation location,
+			File datafile, 
 			DigestableLocation.Digestor digestor, 
 			ResourceTransactionManager txManager) throws ResourceConfigurationException {
-		return new TxDigestableResource(location, digestor, txManager);
+		return new TxDigestableResource(location, datafile, digestor, txManager);
 	}
 	
 	String getKey();

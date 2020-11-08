@@ -6,6 +6,7 @@ import java.util.Set;
 import org.k2.resource.Session;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.MutatingEntityError;
+import org.k2.resource.transaction.ResourceTransaction;
 
 public interface ResourceSession extends Session {
 
@@ -24,5 +25,7 @@ public interface ResourceSession extends Session {
 	<K,E> Set<K> keys(Class<E> entityType, Class<K> keyType);
 
 	<E> String checksum(Class<E> entityType, Object key) throws MissingKeyError;
+
+	ResourceTransaction getTransaction();
 
 }

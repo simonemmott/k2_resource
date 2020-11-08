@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.k2.resource.MetaResource;
 import org.k2.resource.entity.EntityResourceManager;
+import org.k2.resource.entity.MetaEntityResource;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.ResourceConfigurationException;
@@ -88,7 +89,7 @@ public class TxDigestableLocation implements DigestableLocation {
 				location,
 				notFileFilter(nameFileFilter("__meta__.yml")), 
 				falseFileFilter())) {
-			TxDigestableResource resource = DigestableResource.create(file, digestor, resourceManager.getTransactionManager());
+			TxDigestableResource resource = DigestableResource.create(this, file, digestor, resourceManager.getTransactionManager());
 			resources.put(resource.getKey(), resource);
 		}
 		for (File file : FileUtils.listFilesAndDirs(
@@ -130,7 +131,7 @@ public class TxDigestableLocation implements DigestableLocation {
 	
 	private String getDatafileExtension() {
 		if (! hasMetadata()) return "json";
-		return getMetadata(MetaResource.class).getDatafileExtension();
+		return getMetadata(MetaEntityResource.class).getDatafileExtension();
 	}
 
 	@Override
@@ -153,12 +154,9 @@ public class TxDigestableLocation implements DigestableLocation {
 		if (resources.containsKey(key)) throw new DuplicateKeyError(key, "at location: "+location.getAbsolutePath());
 		File newResourceFile = FileUtils.getFile(location, key+"."+getDatafileExtension());
 		try {
-			newResourceFile.createNewFile();
-			TxDigestableResource resource = DigestableResource.create(newResourceFile, digestor, resourceManager.getTransactionManager());
+			TxDigestableResource resource = DigestableResource.create(this, newResourceFile, digestor, resourceManager.getTransactionManager());
 			resources.put(resource.getKey(), resource);
 			return resource;
-		} catch (IOException e) {
-			throw new UnexpectedResourceError("Unable to create new resource file: "+newResourceFile.getAbsolutePath(), e);
 		} catch (ResourceConfigurationException e) {
 			throw new UnexpectedResourceError("Unable to create new resource with key: "+key+" at location: "+location.getAbsolutePath(), e);
 		}

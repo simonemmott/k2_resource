@@ -45,5 +45,6 @@ public interface EntityCache {
 			MutatingEntityError, 
 			DuplicateKeyError, 
 			EntityLockedError;
+	void clear();
 
 }

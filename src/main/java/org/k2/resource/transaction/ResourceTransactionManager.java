@@ -1,15 +1,20 @@
 package org.k2.resource.transaction;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.k2.resource.ResourceManager;
 import org.k2.resource.exception.DuplicateKeyError;
 import org.k2.resource.exception.MissingKeyError;
 import org.k2.resource.exception.UnexpectedResourceError;
 import org.k2.resource.location.DigestableLocation;
 
+import lombok.Setter;
+
 public class ResourceTransactionManager implements TransactionManager {
 	
 	private final DigestableLocation dir;
 	private final ThreadLocal<ResourceTransaction> threadLocalTransaction;
+	@Setter
+	private ResourceManager resourceManager;
 
 	public ResourceTransactionManager(DigestableLocation dir) {
 		this.dir = dir;
@@ -39,6 +44,7 @@ public class ResourceTransactionManager implements TransactionManager {
 	
 	void releaseTransaction(ResourceTransaction transaction) {
 		try {
+			resourceManager.getSession().clear();
 			threadLocalTransaction.remove();
 			dir.removeLocation(transaction.getTransactionId());
 		} catch (MissingKeyError e) {
