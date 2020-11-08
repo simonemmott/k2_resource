@@ -14,7 +14,7 @@ import java.util.zip.Checksum;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.k2.resource.entity.MetaEntityResource;
 import org.k2.resource.entity.annotation.Key;
@@ -33,7 +33,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @RunWith(PowerMockRunner.class)
-class SimpleEntityCacheTest {
+public class SimpleEntityCacheTest {
 	
 	private SimpleEntityCache cache;
 	
@@ -53,13 +53,13 @@ class SimpleEntityCacheTest {
 	}
 
 	@Test
-	void testContextLoads() throws Exception {
+	public void testContextLoads() throws Exception {
 		cache = testCache();
 		assertThat(cache).isNotNull();
 	}
 	
 	@Test
-	void testPutGet() throws Exception {
+	public void testPutGet() throws Exception {
 		cache = testCache();
 		TestEntity1 e1_1 = new TestEntity1("1");
 		TestEntity1 e1_2 = new TestEntity1("2");
@@ -78,21 +78,21 @@ class SimpleEntityCacheTest {
 	}
 	
 	@Test
-	void testGetThrowsMissingKeyError() {
+	public void testGetThrowsMissingKeyError() {
 		cache = testCache();
 		assertThatThrownBy(() -> cache.get(TestEntity1.class, "1"))
 				.isInstanceOf(MissingKeyError.class);
 	}
 	
 	@Test
-	void testDeleteThrowsMissingKeyError() {
+	public void testDeleteThrowsMissingKeyError() {
 		cache = testCache();
 		assertThatThrownBy(() -> cache.delete(TestEntity1.class, "1"))
 				.isInstanceOf(MissingKeyError.class);
 	}
 	
 	@Test
-	void testDelete() throws Exception {
+	public void testDelete() throws Exception {
 		cache = testCache();
 		TestEntity1 e1_1 = new TestEntity1("1");
 		cache.put(TestEntity1.class, "1", e1_1);
@@ -104,7 +104,7 @@ class SimpleEntityCacheTest {
 	}
 	
 	@Test
-	void testHas() throws Exception {
+	public void testHas() throws Exception {
 		cache = testCache();
 		TestEntity1 e1_1 = new TestEntity1("1");
 		assertThat(cache.has(TestEntity1.class, "1")).isFalse();
@@ -113,21 +113,21 @@ class SimpleEntityCacheTest {
 	}
 	
 	@Test
-	void testIsNewThrowsMissingKeyError() {
+	public void testIsNewThrowsMissingKeyError() {
 		cache = testCache();
 		assertThatThrownBy(() -> cache.isNew(TestEntity1.class, "1"))
 				.isInstanceOf(MissingKeyError.class);
 	}
 	
 	@Test
-	void testIsDeletedThrowsMissingKeyError() {
+	public void testIsDeletedThrowsMissingKeyError() {
 		cache = testCache();
 		assertThatThrownBy(() -> cache.isDeleted(TestEntity1.class, "1"))
 				.isInstanceOf(MissingKeyError.class);
 	}
 	
 	@Test
-	void testIsNew() throws Exception {
+	public void testIsNew() throws Exception {
 		cache = testCache();
 		TestEntity1 e1_1 = new TestEntity1("1");
 		cache.put(TestEntity1.class, "1", e1_1);
@@ -136,14 +136,14 @@ class SimpleEntityCacheTest {
 	}
 
 	@Test
-	void testIsChangedThrowsMissingKeyError() {
+	public void testIsChangedThrowsMissingKeyError() {
 		cache = testCache();
 		assertThatThrownBy(() -> cache.isChanged(TestEntity1.class, "1"))
 				.isInstanceOf(MissingKeyError.class);
 	}
 	
 	@Test
-	void testIsChanged() throws Exception {
+	public void testIsChanged() throws Exception {
 		cache = testCache();
 		TestEntity1 e1_1 = new TestEntity1("1");
 		cache.put(TestEntity1.class, "1", e1_1);

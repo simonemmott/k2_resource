@@ -11,7 +11,7 @@ import java.util.zip.Checksum;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.k2.resource.binary.BinaryEntityImpl;
 import org.k2.resource.exception.DuplicateKeyError;
@@ -21,7 +21,9 @@ import org.k2.resource.exception.UnexpectedResourceError;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-class BinaryResourceTest {
+public class BinaryResourceTest {
+	
+	public BinaryResourceTest() {}
 	
 	private static final ThreadLocal<MessageDigest> checksum = ThreadLocal.withInitial(
 			() -> {
@@ -33,14 +35,14 @@ class BinaryResourceTest {
 			});
 	
 	@Test
-	void testNewBinaryResourceLoadsDataFiles() throws Exception {		
+	public void testNewBinaryResourceLoadsDataFiles() throws Exception {		
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);		
 		assertThat(resource.count()).isEqualTo(2);
 	}
 	
 	@Test
-	void testGet() throws Exception {		
+	public void testGet() throws Exception {		
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);	
 		
@@ -60,7 +62,7 @@ class BinaryResourceTest {
 	}
 
 	@Test
-	void testGetThrowsMissingKEyError() throws Exception {		
+	public void testGetThrowsMissingKEyError() throws Exception {		
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
 		
@@ -70,7 +72,7 @@ class BinaryResourceTest {
 	}
 	
 	@Test
-	void testExists() throws Exception {
+	public void testExists() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
 		assertThat(resource.exists("FredFlintstone")).isTrue();
@@ -80,7 +82,7 @@ class BinaryResourceTest {
 	}
 
 	@Test
-	void testFetch() throws Exception {
+	public void testFetch() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
 		assertThat(resource.fetch()).contains(resource.get("FredFlintstone"));
@@ -89,7 +91,7 @@ class BinaryResourceTest {
 	}
 	
 	@Test
-	void testCreate() throws Exception {
+	public void testCreate() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testCreate");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
@@ -109,7 +111,7 @@ class BinaryResourceTest {
 	}
 	
 	@Test
-	void testCreateThrowsDuplicateKeyException() throws Exception {
+	public void testCreateThrowsDuplicateKeyException() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/BS1");
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
 		BinaryEntityImpl be = new BinaryEntityImpl("AAAA", "AAAA".getBytes());
@@ -120,7 +122,7 @@ class BinaryResourceTest {
 	}
 	
 	@Test
-	void testUpdate() throws Exception {
+	public void testUpdate() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testUpdate");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
@@ -141,7 +143,7 @@ class BinaryResourceTest {
 	}
 	
 	@Test
-	void testSaveCallsCreateWhenObjIsNew() throws Exception {
+	public void testSaveCallsCreateWhenObjIsNew() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testSave");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
@@ -159,7 +161,7 @@ class BinaryResourceTest {
 	}
 	
 	@Test
-	void testSaveCallsUpdateWhenObjIsNotNew() throws Exception {
+	public void testSaveCallsUpdateWhenObjIsNotNew() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testSave");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
@@ -179,7 +181,7 @@ class BinaryResourceTest {
 	}
 	
 	@Test
-	void testRemove() throws Exception {
+	public void testRemove() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testDelete");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);
@@ -200,7 +202,7 @@ class BinaryResourceTest {
 	}
 	
 	@Test
-	void testDelete() throws Exception {
+	public void testDelete() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testDelete");
 		FileUtils.cleanDirectory(resourceDir);
 		BinaryResource resource = new BinaryResource(resourceDir, checksum);

@@ -528,7 +528,11 @@ class ManagedEntityResourceTest {
 		item.setData(123);		
 		refItem1Resource.save(item);		
 		rm.getSession().getTransaction().commit();
+		RefItem1 saved = mapper.readValue(itemFile, RefItem1.class);
+		assertThat(saved).isEqualTo(item);
+
 		RefItem1[] items = new RefItem1[1];
+		
 		rm.getSession().doInTransaction(() -> {
 			items[0] = refItem1Resource.get("KEY");
 			items[0].setName("UPDATED");
@@ -540,6 +544,7 @@ class ManagedEntityResourceTest {
 
 		RefItem1 committed = mapper.readValue(itemFile, RefItem1.class);
 		assertThat(committed).isEqualTo(items[0]);
+		assertThat(committed).isNotEqualTo(item);
 		FileUtils.cleanDirectory(transactionsDir);
 	}
 	
