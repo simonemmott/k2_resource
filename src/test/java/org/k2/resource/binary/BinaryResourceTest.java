@@ -10,6 +10,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -91,6 +92,7 @@ public class BinaryResourceTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testCreate() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testCreate");
 		FileUtils.cleanDirectory(resourceDir);
@@ -122,6 +124,7 @@ public class BinaryResourceTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testUpdate() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testUpdate");
 		FileUtils.cleanDirectory(resourceDir);
@@ -181,6 +184,7 @@ public class BinaryResourceTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testRemove() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testDelete");
 		FileUtils.cleanDirectory(resourceDir);
@@ -202,6 +206,7 @@ public class BinaryResourceTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testDelete() throws Exception {
 		File resourceDir = new File("testFilesystem/BinaryResourceTest/testDelete");
 		FileUtils.cleanDirectory(resourceDir);

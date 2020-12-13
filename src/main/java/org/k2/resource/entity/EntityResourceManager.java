@@ -12,6 +12,7 @@ import org.k2.resource.ResourceManager;
 import org.k2.resource.Session;
 import org.k2.resource.entity.exception.ManagedResourceError;
 import org.k2.resource.entity.exception.ManagedResourceInitializationError;
+import org.k2.resource.entity.model.EntityResourceManagerState;
 import org.k2.resource.entity.simple.ManagedResourceSession;
 import org.k2.resource.entity.simple.SimpleResourceSession;
 import org.k2.resource.exception.ResourceConfigurationException;
@@ -155,6 +156,12 @@ public class EntityResourceManager implements ResourceManager {
 							"Managed resource for type: {0} not applicaple to Type: {0}",
 							entityType.getName()));
 		}
+	}
+	
+	public EntityResourceManagerState getState() {
+		EntityResourceManagerState state = new EntityResourceManagerState();
+		state.setResourcesDir(location.getLocation().getAbsolutePath());
+		return state;
 	}
 
 }

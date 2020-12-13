@@ -46,9 +46,11 @@ public class ReflectionUtils {
 			Class<?> cls, 
 			Class<? extends Annotation> annType) throws MissingAnnotationError {
 		for (Method method : cls.getDeclaredMethods()) {
-			for (Annotation ann : method.getAnnotations()) {
-				if (ann.annotationType().equals(annType)) {
-					return method;
+			if (method.getParameterCount() == 0) {
+				for (Annotation ann : method.getAnnotations()) {
+					if (ann.annotationType().equals(annType)) {
+						return method;
+					}
 				}
 			}
 		}

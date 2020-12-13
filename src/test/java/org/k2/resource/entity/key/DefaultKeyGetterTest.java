@@ -18,6 +18,8 @@ public class DefaultKeyGetterTest {
 		private String aKey;
 		@Getter
 		private String notKey;
+		
+		public void hmmmm() {}
 	}
 
 	@AllArgsConstructor
